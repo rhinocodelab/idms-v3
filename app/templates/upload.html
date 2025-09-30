@@ -1,0 +1,846 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Documents - IDMS{% endblock %}
+
+{% block page_title %}Document Upload{% endblock %}
+{% block page_subtitle %}AI-powered classification and FileNet storage{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- AI Document Classification Section -->
+    <div id="ai-classification" class="upload-section">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header with Upload Button -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 mr-4">
+                        <i class="fas fa-brain text-xl text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">AI Document Classification</h2>
+                        <p class="text-sm text-gray-600">Upload and manage your AI-classified documents</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="showUploadModal()" class="bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Upload Documents
+                    </button>
+                    <button onclick="showProcessInfoModal()" class="bg-gray-100 text-gray-600 px-3 py-2 hover:bg-gray-200 transition-colors rounded-none" title="AI Classification Process">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Documents Table -->
+            <div class="bg-white shadow-sm border border-gray-200 mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Your AI Classified Documents</h3>
+                    <p class="text-sm text-gray-600">Documents processed with AI classification</p>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criticality</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Storage</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retention</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <!-- Admin-only Uploaded By column -->
+                                    <th id="ai-uploaded-by-header" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden">
+                                        Uploaded By
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentsTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Documents will be loaded here -->
+                            </tbody>
+                        </table>
+                        </div>
+                        
+                    <!-- Loading State -->
+                    <div id="documentsLoading" class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">Loading documents...</p>
+                        </div>
+                        
+                    <!-- Empty State -->
+                    <div id="documentsEmpty" class="text-center py-8 hidden">
+                        <i class="fas fa-file-upload text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
+                        <p class="text-gray-500 mb-4">Upload your first document to get started with AI classification</p>
+                </div>
+                
+                    <!-- Pagination -->
+                    <div id="documentsPagination" class="mt-6 flex items-center justify-between">
+                        <!-- Pagination will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Business Document Upload Section - HIDDEN -->
+    <div id="business-upload" class="upload-section hidden">
+        <div class="max-w-6xl mx-auto">
+            <!-- Business Upload Layout: Card and Info Box Side by Side -->
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Upload Card -->
+                <div class="lg:w-2/3">
+                    <div class="bg-white  shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 p-3 mr-4">
+                        <i class="fas fa-briefcase text-xl text-green-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Business Documents</h2>
+                        <p class="text-sm text-gray-600">Direct upload to IBM DataCap system</p>
+                    </div>
+                </div>
+                
+                <form action="/business_upload" method="post" enctype="multipart/form-data" id="businessForm">
+                    <div class="space-y-4">
+                        <!-- File Input -->
+                        <div class="border-2 border-dashed border-gray-300  p-8 text-center hover:border-green-400 transition-colors">
+                            <input type="file" name="file" accept=".pdf,.docx,.odt,.csv,.xlsx,.xls,.png,.jpg,.jpeg" 
+                                   id="businessFile" class="hidden" required>
+                            <label for="businessFile" class="cursor-pointer">
+                                <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-lg font-medium text-gray-700 mb-2">Select business document</p>
+                                <p class="text-sm text-gray-500">Single file upload to DataCap</p>
+                            </label>
+                        </div>
+                        
+                        <!-- Selected File Display -->
+                        <div id="selectedBusinessFile" class="hidden">
+                            <h3 class="font-medium text-gray-900 mb-2">Selected File:</h3>
+                            <p id="businessFileName" class="text-sm text-gray-600"></p>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                class="w-full bg-green-600 text-white py-3 px-4 hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload to DataCap
+                        </button>
+                    </div>
+                </form>
+                    </div>
+                </div>
+                
+                <!-- Business Upload Info Box -->
+                <div class="lg:w-96 flex-shrink-0">
+                    <div class="bg-green-50 border border-green-200  p-6 h-fit">
+                        <h3 class="text-lg font-semibold text-green-900 mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Business Document Upload Process
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="bg-green-600 text-white text-xs font-bold px-2 py-1 mr-3 mt-0.5">1</div>
+                                <div>
+                                    <p class="font-medium text-green-900">Upload Single Document</p>
+                                    <p class="text-sm text-green-800">Select one business document for immediate processing</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-green-600 text-white text-xs font-bold px-2 py-1 mr-3 mt-0.5">2</div>
+                                <div>
+                                    <p class="font-medium text-green-900">Direct DataCap Upload</p>
+                                    <p class="text-sm text-green-800">Document uploaded directly to IBM DataCap system without AI processing</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-green-600 text-white text-xs font-bold px-2 py-1 mr-3 mt-0.5">3</div>
+                                <div>
+                                    <p class="font-medium text-green-900">Processing Confirmation</p>
+                                    <p class="text-sm text-green-800">Receive immediate confirmation and tracking ID for your upload</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white shadow-xl max-w-2xl w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-cloud-upload-alt mr-2 text-blue-600"></i>Upload Documents for AI Classification
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <!-- Drag & Drop Upload Area -->
+                    <div id="modalDropZone" class="border-2 border-dashed border-gray-300 p-8 text-center hover:border-blue-400 transition-colors">
+                        <input type="file" id="modalFiles" multiple accept=".pdf,.docx,.odt,.csv,.xlsx,.xls,.png,.jpg,.jpeg,.zip,.7z,.tar,.gz,.bz2,.xz,.rar,.txt,.json,.yaml,.yml" class="hidden">
+                        <label for="modalFiles" class="cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Click to select files or drag & drop</p>
+                            <p class="text-sm text-gray-500">Supports: PDF, DOCX, Excel, CSV, Images, Archives, and more</p>
+                        </label>
+                    </div>
+                    
+                    <!-- Selected Files Display -->
+                    <div id="modalSelectedFiles" class="hidden mt-4">
+                        <h4 class="font-medium text-gray-900 mb-2">Selected Files:</h4>
+                        <ul id="modalFileList" class="space-y-2 max-h-40 overflow-y-auto"></ul>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="hidden mt-4">
+                        <div class="bg-gray-200 h-2">
+                            <div id="progressBar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText" class="text-sm text-gray-600 mt-2">Uploading...</p>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="hideUploadModal()" 
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="button" id="modalUploadBtn" onclick="uploadModalFiles()" 
+                                class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-upload mr-2"></i>Upload & Process
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Info Modal -->
+    <div id="processInfoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white shadow-xl max-w-4xl w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>AI Document Classification Process
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <!-- Process Steps -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white text-sm font-bold px-3 py-2 mr-4">1</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Document Upload</h4>
+                                <p class="text-sm text-gray-600">Upload multiple documents using drag & drop or file selection. Supports PDF, DOCX, Excel, CSV, Images, Archives, and more.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white text-sm font-bold px-3 py-2 mr-4">2</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">AI Analysis</h4>
+                                <p class="text-sm text-gray-600">WatsonX AI analyzes document content, extracts text, and automatically classifies document type.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white text-sm font-bold px-3 py-2 mr-4">3</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Criticality Assignment</h4>
+                                <p class="text-sm text-gray-600">System assigns appropriate security levels (Public, Confidential, Restricted, Top Secret, Classified) based on document content and type.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-blue-600 text-white text-sm font-bold px-3 py-2 mr-4">4</div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">FileNet Storage</h4>
+                                <p class="text-sm text-gray-600">Documents are automatically uploaded to IBM FileNet with proper metadata, organization, and security classifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Features Section -->
+                    <div class="bg-gray-50 p-4 mb-6">
+                        <h4 class="font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-star mr-2 text-yellow-500"></i>Key Features
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">Batch processing of multiple files</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">Automatic document classification</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">Security level assignment</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">FileNet integration</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">Progress tracking</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <span class="text-sm text-gray-700">Document management</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Supported File Types -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-900 mb-3">
+                            <i class="fas fa-file-alt mr-2"></i>Supported File Types
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div class="flex items-center">
+                                <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                <span>PDF Documents</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-word text-blue-500 mr-2"></i>
+                                <span>Word Documents</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-excel text-green-500 mr-2"></i>
+                                <span>Excel Spreadsheets</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-image text-purple-500 mr-2"></i>
+                                <span>Images (PNG, JPG)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-archive text-orange-500 mr-2"></i>
+                                <span>Archives (ZIP, 7Z)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-code text-gray-500 mr-2"></i>
+                                <span>Text Files</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-alt text-indigo-500 mr-2"></i>
+                                <span>CSV Files</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-file-code text-pink-500 mr-2"></i>
+                                <span>JSON/YAML</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Close Button -->
+                    <div class="flex justify-end mt-6">
+                        <button onclick="hideProcessInfoModal()" 
+                                class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-check mr-2"></i>Got it!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Global variables
+let currentPage = 1;
+let documentsData = [];
+
+// Modal functions
+function showUploadModal() {
+    document.getElementById('uploadModal').classList.remove('hidden');
+    resetModal();
+}
+
+function hideUploadModal() {
+    document.getElementById('uploadModal').classList.add('hidden');
+    resetModal();
+}
+
+// Process Info Modal functions
+function showProcessInfoModal() {
+    document.getElementById('processInfoModal').classList.remove('hidden');
+}
+
+function hideProcessInfoModal() {
+    document.getElementById('processInfoModal').classList.add('hidden');
+}
+
+function resetModal() {
+    document.getElementById('modalFiles').value = '';
+    document.getElementById('modalSelectedFiles').classList.add('hidden');
+    document.getElementById('uploadProgress').classList.add('hidden');
+    document.getElementById('modalUploadBtn').disabled = true;
+    document.getElementById('progressBar').style.width = '0%';
+}
+
+// Global variable to track user role
+let aiUserRole = 'viewer';
+
+// Load user documents
+async function loadUserDocuments(page = 1) {
+    try {
+        document.getElementById('documentsLoading').classList.remove('hidden');
+        document.getElementById('documentsTableBody').innerHTML = '';
+        document.getElementById('documentsEmpty').classList.add('hidden');
+        
+        const response = await fetch(`/api/ai-documents?page=${page}&limit=10`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            documentsData = data.documents;
+            currentPage = page;
+            
+            // Store user role and show/hide admin-only columns
+            aiUserRole = data.user_role || 'viewer';
+            toggleAIAdminColumns(aiUserRole === 'admin');
+            
+            if (documentsData.length === 0) {
+                document.getElementById('documentsLoading').classList.add('hidden');
+                document.getElementById('documentsEmpty').classList.remove('hidden');
+            } else {
+                renderDocumentsTable();
+                renderPagination(data.pagination);
+            }
+        } else {
+            console.error('Error loading documents:', data);
+            document.getElementById('documentsLoading').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading documents:', error);
+        document.getElementById('documentsLoading').classList.add('hidden');
+    }
+}
+
+function toggleAIAdminColumns(isAdmin) {
+    // Show or hide the "Uploaded By" column header
+    const uploadedByHeader = document.getElementById('ai-uploaded-by-header');
+    if (uploadedByHeader) {
+        if (isAdmin) {
+            uploadedByHeader.classList.remove('hidden');
+        } else {
+            uploadedByHeader.classList.add('hidden');
+        }
+    }
+}
+
+function renderDocumentsTable() {
+    const tbody = document.getElementById('documentsTableBody');
+    tbody.innerHTML = '';
+    
+    documentsData.forEach(doc => {
+        const row = document.createElement('tr');
+        
+        // Create admin-only uploaded by column
+        const uploadedByColumn = aiUserRole === 'admin' ? `
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                ${doc.uploaded_by || 'Unknown'}
+            </td>
+        ` : '';
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-file text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">${doc.original_filename}</div>
+                        <div class="text-sm text-gray-500">${(doc.file_size / 1024 / 1024).toFixed(2)} MB</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">${doc.document_type}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCriticalityBadgeClass(doc.criticality_level)}">
+                    ${doc.criticality_level}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">${doc.storage_type || 'Local Folder'}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">${doc.retention_period || '3'} years</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(doc.processing_status)}">
+                    ${doc.processing_status}
+                </span>
+            </td>
+            ${uploadedByColumn}
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${new Date(doc.upload_timestamp).toLocaleDateString()}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button onclick="deleteAIDocument(${doc.id}, '${doc.filename}')" class="text-red-600 hover:text-red-900" title="Delete Document">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    document.getElementById('documentsLoading').classList.add('hidden');
+}
+
+function getCriticalityBadgeClass(criticality) {
+    const classes = {
+        'Public': 'bg-green-100 text-green-800',
+        'Confidential': 'bg-yellow-100 text-yellow-800',
+        'Restricted': 'bg-orange-100 text-orange-800',
+        'Top Secret': 'bg-red-100 text-red-800',
+        'Classified': 'bg-purple-100 text-purple-800'
+    };
+    return classes[criticality] || 'bg-gray-100 text-gray-800';
+}
+
+function getStatusBadgeClass(status) {
+    const classes = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'completed': 'bg-green-100 text-green-800',
+        'failed': 'bg-red-100 text-red-800'
+    };
+    return classes[status] || 'bg-gray-100 text-gray-800';
+}
+
+function renderPagination(pagination) {
+    const container = document.getElementById('documentsPagination');
+    if (pagination.pages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = `
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing ${pagination.start} to ${pagination.end} of ${pagination.total} results
+            </div>
+            <div class="flex space-x-2">
+    `;
+    
+    // Previous button
+    if (pagination.page > 1) {
+        html += `<button onclick="loadUserDocuments(${pagination.page - 1})" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50">Previous</button>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= pagination.pages; i++) {
+        if (i === pagination.page) {
+            html += `<button class="px-3 py-1 text-sm bg-blue-600 text-white rounded">${i}</button>`;
+        } else {
+            html += `<button onclick="loadUserDocuments(${i})" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50">${i}</button>`;
+        }
+    }
+    
+    // Next button
+    if (pagination.page < pagination.pages) {
+        html += `<button onclick="loadUserDocuments(${pagination.page + 1})" class="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50">Next</button>`;
+    }
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// Document actions
+function viewDocument(documentId) {
+    // TODO: Implement document view functionality
+    console.log('View document:', documentId);
+}
+
+function downloadDocument(documentId) {
+    // TODO: Implement document download functionality
+    console.log('Download document:', documentId);
+}
+
+async function deleteAIDocument(documentId, filename) {
+    if (!confirm(`Are you sure you want to delete "${filename}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/ai-documents/${documentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            showNotification('Document deleted successfully', 'success');
+            // Reload the documents table
+            loadDocuments(currentPage);
+        } else {
+            const error = await response.json();
+            showNotification(error.detail || 'Failed to delete document', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting document:', error);
+        showNotification('Error deleting document. Please try again.', 'error');
+    }
+}
+
+// Modal file handling
+function setupModalFileHandling() {
+    const modalFiles = document.getElementById('modalFiles');
+    const modalSelectedFiles = document.getElementById('modalSelectedFiles');
+    const modalFileList = document.getElementById('modalFileList');
+    const modalUploadBtn = document.getElementById('modalUploadBtn');
+    const modalDropZone = document.getElementById('modalDropZone');
+    
+    modalFiles.addEventListener('change', function(e) {
+        handleModalFileSelection(Array.from(e.target.files));
+    });
+    
+    // Drag and drop for modal
+    modalDropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        modalDropZone.classList.add('border-blue-400', 'bg-blue-50');
+    });
+    
+    modalDropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        modalDropZone.classList.remove('border-blue-400', 'bg-blue-50');
+    });
+    
+    modalDropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        modalDropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        const files = Array.from(e.dataTransfer.files);
+        handleModalFileSelection(files);
+    });
+}
+
+function handleModalFileSelection(files) {
+    const modalSelectedFiles = document.getElementById('modalSelectedFiles');
+    const modalFileList = document.getElementById('modalFileList');
+    const modalUploadBtn = document.getElementById('modalUploadBtn');
+        
+        if (files.length > 0) {
+        modalFileList.innerHTML = '';
+        files.forEach(file => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
+            li.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-file text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-700">${file.name}</span>
+                    <span class="text-xs text-gray-500 ml-2">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
+                <button onclick="removeModalFile(this)" class="text-red-500 hover:text-red-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            modalFileList.appendChild(li);
+        });
+        modalSelectedFiles.classList.remove('hidden');
+        modalUploadBtn.disabled = false;
+    } else {
+        modalSelectedFiles.classList.add('hidden');
+        modalUploadBtn.disabled = true;
+    }
+}
+
+function removeModalFile(button) {
+    button.parentElement.remove();
+    const remainingFiles = document.querySelectorAll('#modalFileList li');
+    if (remainingFiles.length === 0) {
+        document.getElementById('modalSelectedFiles').classList.add('hidden');
+        document.getElementById('modalUploadBtn').disabled = true;
+    }
+}
+
+async function uploadModalFiles() {
+    const modalFiles = document.getElementById('modalFiles');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const modalUploadBtn = document.getElementById('modalUploadBtn');
+    
+    if (!modalFiles.files.length) return;
+    
+    // Show progress
+    uploadProgress.classList.remove('hidden');
+    modalUploadBtn.disabled = true;
+    modalUploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+    
+    // Create FormData
+    const formData = new FormData();
+    Array.from(modalFiles.files).forEach(file => {
+        formData.append('files', file);
+    });
+    
+    try {
+        const response = await fetch('/upload_files', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Upload completed!';
+            
+            // Reload documents table
+            setTimeout(() => {
+                hideUploadModal();
+                loadUserDocuments(currentPage);
+            }, 1000);
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        progressText.textContent = 'Upload failed. Please try again.';
+    } finally {
+        modalUploadBtn.disabled = false;
+        modalUploadBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Upload & Process';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Load user documents on page load
+    loadUserDocuments();
+    
+    // Setup modal functionality
+    setupModalFileHandling();
+    
+    // Removed old classification form handling - now using modal upload
+    
+    // Business form file handling
+    const businessFile = document.getElementById('businessFile');
+    const selectedBusinessFile = document.getElementById('selectedBusinessFile');
+    const businessFileName = document.getElementById('businessFileName');
+    
+    businessFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const submitBtn = document.querySelector('#businessForm button[type="submit"]');
+        
+        if (file) {
+            businessFileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            selectedBusinessFile.classList.remove('hidden');
+            submitBtn.disabled = false;
+        } else {
+            selectedBusinessFile.classList.add('hidden');
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Drag and drop functionality for Business Documents
+    const businessDropZone = document.querySelector('#businessForm .border-dashed');
+    
+    businessDropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        businessDropZone.classList.add('drag-over');
+    });
+    
+    businessDropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        businessDropZone.classList.remove('drag-over');
+    });
+    
+    businessDropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        businessDropZone.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files);
+        const submitBtn = document.querySelector('#businessForm button[type="submit"]');
+        
+        if (files.length > 0) {
+            // Filter files by accepted types for business documents
+            const acceptedTypes = ['.pdf', '.docx', '.odt', '.csv', '.xlsx', '.xls', '.png', '.jpg', '.jpeg'];
+            const validFiles = files.filter(file => {
+                const extension = '.' + file.name.split('.').pop().toLowerCase();
+                return acceptedTypes.includes(extension);
+            });
+            
+            if (validFiles.length > 0) {
+                // Take only the first valid file for business documents (single file upload)
+                const file = validFiles[0];
+                
+                // Update the file input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                businessFile.files = dt.files;
+                
+                // Update the display
+                businessFileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                selectedBusinessFile.classList.remove('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+    });
+    
+    // Removed old classification form submission - now using modal upload
+    
+    document.getElementById('businessForm').addEventListener('submit', function() {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading...';
+    });
+    
+    // Auto-expand upload submenu since we're on upload page
+    const submenu = document.getElementById('upload-submenu');
+    const arrow = document.getElementById('upload-menu-arrow');
+    
+    if (submenu && arrow) {
+        submenu.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+    }
+    
+    // Show only the relevant section based on URL hash
+    function showRelevantSection() {
+        const aiSection = document.getElementById('ai-classification');
+        const businessSection = document.getElementById('business-upload');
+        
+        // Hide all sections initially
+        aiSection.style.display = 'none';
+        businessSection.style.display = 'none';
+        
+        // Show section based on URL hash or default to both
+        const hash = window.location.hash;
+        
+        if (hash === '#ai-classification') {
+            aiSection.style.display = 'block';
+        } else if (hash === '#business-upload') {
+            businessSection.style.display = 'block';
+        } else {
+            // Default: show both sections (for direct navigation to /upload)
+            aiSection.style.display = 'block';
+            businessSection.style.display = 'block';
+        }
+    }
+    
+    // Initial call
+    showRelevantSection();
+    
+    // Listen for hash changes (when navigating via submenu)
+    window.addEventListener('hashchange', showRelevantSection);
+});
+</script>
+{% endblock %}

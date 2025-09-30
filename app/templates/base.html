@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IDMS - Intelligent Document Management System{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    
+    <style>
+        /* Toast Notification Styles */
+        .toast {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: all 0.3s ease-in-out;
+            min-width: 300px;
+            position: relative;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+        
+        .toast.error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        
+        .toast.warning {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+        
+        .toast.info {
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+        
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        
+        .toast-message {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .toast-close {
+            margin-left: 12px;
+            background: none;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toast-close:hover {
+            opacity: 1;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 0 8px 8px;
+            transition: width linear;
+        }
+        
+        @keyframes progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-gray-900 text-white shadow-lg transition-transform duration-300 ease-in-out flex-shrink-0 flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-700 flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <img src="{{ url_for('static', path='images/cybercorp_logo.png') }}" alt="CyberCorp Logo" class="h-16 w-16 object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">IDMS</h1>
+                        <p class="text-xs text-gray-400 mt-1">Intelligent Document Management System</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu - Scrollable -->
+            <nav class="mt-6 flex-1 overflow-y-auto">
+                <div class="px-3">
+                    <a href="/dashboard" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/dashboard' %}bg-gray-800 text-white{% endif %}">
+                        <i class="fas fa-home mr-3"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <!-- User Management - Admin Only -->
+                    <div id="user-management-menu" class="hidden">
+                        <a href="/admin-console" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/admin-console' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-users mr-3"></i>
+                            <span>User Management</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Upload Documents Menu with Sub-menus -->
+                    <div class="mb-2">
+                        <button onclick="toggleUploadMenu()" class="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/upload' %}bg-gray-800 text-white{% endif %}">
+                            <div class="flex items-center">
+                                <i class="fas fa-upload mr-3"></i>
+                                <span>Upload Documents</span>
+                            </div>
+                            <i id="upload-menu-arrow" class="fas fa-chevron-down transition-transform duration-200"></i>
+                        </button>
+                        <div id="upload-submenu" class="ml-4 mt-1 space-y-1 hidden">
+                            <a href="/upload#ai-classification" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
+                                <i class="fas fa-brain mr-2"></i>
+                                <span>AI Document Classification</span>
+                            </a>
+                            <!-- Business Documents submenu hidden -->
+                            <!-- <a href="/upload#business-upload" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
+                                <i class="fas fa-briefcase mr-2"></i>
+                                <span>Business Documents</span>
+                            </a> -->
+                        </div>
+                    </div>
+                    <a href="/ghostlayer-ai" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/ghostlayer-ai' %}bg-gray-800 text-white{% endif %}">
+                        <i class="fas fa-ghost mr-3"></i>
+                        <span>GhostLayer AI</span>
+                    </a>
+                    <a href="/analytics" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/analytics' %}bg-gray-800 text-white{% endif %}">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        <span>Analytics</span>
+                    </a>
+                    
+                    <!-- ACCE Console (Administration Console for Content Platform Engine) - Admin Only -->
+                    <div id="acce-console-menu" class="hidden">
+                        <a href="https://win-1gpq0nalnpb:9443/acce/login.jsp" target="_blank" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200" title="Administration Console for Content Platform Engine">
+                            <i class="fas fa-external-link-alt mr-3"></i>
+                            <span>ACCE Console</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-700 my-4"></div>
+
+
+                <!-- System Status -->
+                <div class="px-3">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">System Status</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between px-4 py-2 bg-gray-800 ">
+                            <span class="text-sm text-gray-300">FileNet</span>
+                            <span id="filenet-status" class="text-xs text-yellow-400">
+                                <i class="fas fa-spinner fa-spin mr-1"></i>Checking...
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between px-4 py-2 bg-gray-800 ">
+                            <span class="text-sm text-gray-300">Server</span>
+                            <span id="server-status" class="text-xs text-green-400">
+                                <i class="fas fa-check-circle mr-1"></i>Running
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 text-center">
+                        <span id="last-updated">Last updated: --</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-700 flex-shrink-0">
+                <div class="text-xs text-gray-400 text-center">
+                    <p>&copy; 2025 CYBERCORP IDMS</p>
+                    <p>Powered by IBM WatsonX AI</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <!-- Mobile menu button -->
+                    <button id="sidebar-toggle" class="lg:hidden text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+
+                    <!-- Page Title -->
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h2>
+                        <p class="text-sm text-gray-600 mt-1">{% block page_subtitle %}Welcome to IDMS{% endblock %}</p>
+                    </div>
+
+                    <!-- User Info and Actions -->
+                    <div class="flex items-center">
+                        <!-- Profile Card Button with Avatar -->
+                        <div class="relative">
+                            <button onclick="toggleProfileDropdown()" 
+                                    class="flex items-center space-x-3 bg-gray-100 hover:bg-gray-200 px-4 py-2 transition-colors border border-gray-300">
+                                <!-- Avatar with Initials -->
+                                <div id="user-avatar" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                                    --
+                                </div>
+                                <!-- User Info -->
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-900" id="user-name">Loading...</p>
+                                    <p class="text-xs text-gray-500" id="user-role">Loading...</p>
+                                </div>
+                                <!-- Dropdown Icon -->
+                                <i id="profile-dropdown-icon" class="fas fa-chevron-down text-gray-500 text-xs"></i>
+                            </button>
+                            
+                            <!-- Profile Dropdown Menu -->
+                            <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white shadow-lg border border-gray-200 z-50">
+                                <div class="py-1">
+                                    <a href="#" onclick="showUserProfile(); return false;" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-user mr-3 text-gray-400"></i>
+                                        View Profile
+                                    </a>
+                                    <a href="#" onclick="showPasswordChangeModal(); return false;" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-key mr-3 text-gray-400"></i>
+                                        Change Password
+                                    </a>
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    <a href="#" onclick="logout(); return false;" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i class="fas fa-sign-out-alt mr-3"></i>
+                                        Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- Password Change Notification -->
+            <div id="passwordChangeNotification" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-6 mt-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Security Notice:</strong> You are using a default password. Please change your password for security reasons.
+                            <button onclick="showPasswordChangeModal()" class="ml-2 text-yellow-800 underline hover:text-yellow-900">
+                                Change Password Now
+                            </button>
+                        </p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <div class="-mx-1.5 -my-1.5">
+                            <button onclick="hidePasswordChangeNotification()" class="inline-flex bg-yellow-50 rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-50 focus:ring-yellow-600">
+                                <span class="sr-only">Dismiss</span>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50">
+                <div class="p-6">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 max-w-sm"></div>
+
+    <!-- Password Change Modal -->
+    <div id="passwordChangeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white shadow-xl max-w-md w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-key mr-2 text-blue-600"></i>Change Password
+                    </h3>
+                </div>
+                <form id="passwordChangeForm" class="p-6">
+                    <div class="mb-4">
+                        <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock mr-2"></i>Current Password
+                        </label>
+                        <input type="password" id="currentPassword" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your current password">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-key mr-2"></i>New Password
+                        </label>
+                        <input type="password" id="newPassword" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your new password">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-check mr-2"></i>Confirm New Password
+                        </label>
+                        <input type="password" id="confirmPassword" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Confirm your new password">
+                    </div>
+                    
+                    <div id="passwordChangeError" class="hidden bg-red-50 border border-red-200 p-2 text-red-700 text-sm mb-4">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span id="passwordChangeErrorText"></span>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hidePasswordChangeModal()" 
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white shadow-xl max-w-md w-full rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            <i class="fas fa-user mr-2 text-blue-600"></i>User Profile
+                        </h3>
+                        <button onclick="hideUserProfile()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <!-- User Information Display -->
+                    <div class="mb-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div id="profile-modal-avatar" class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold">
+                                        --
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl font-semibold text-gray-900" id="profile-user-name">Loading...</h4>
+                                    <p class="text-sm text-gray-600 mt-1" style="word-break: break-all;">
+                                        <i class="fas fa-envelope mr-1 text-blue-500"></i>
+                                        <span id="profile-user-email">Loading...</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i class="fas fa-id-badge mr-1"></i>
+                                        Role: <span class="font-medium" id="profile-user-role">Loading...</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebar-overlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // Quick upload modal
+        function showQuickUpload() {
+            window.location.href = '/upload';
+        }
+
+        // Settings modal
+        function showSettings() {
+            alert('Settings panel coming soon!');
+        }
+
+        // User Profile modal
+        // Profile dropdown functions
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profile-dropdown');
+            const icon = document.getElementById('profile-dropdown-icon');
+            
+            if (dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                dropdown.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileButton = event.target.closest('button[onclick*="toggleProfileDropdown"]');
+            
+            if (!profileButton && dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                const icon = document.getElementById('profile-dropdown-icon');
+                if (icon) {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            }
+        });
+        
+        // Generate user initials from full name
+        function getUserInitials(fullName) {
+            if (!fullName) return '--';
+            
+            const names = fullName.trim().split(' ');
+            if (names.length === 1) {
+                return names[0].substring(0, 2).toUpperCase();
+            }
+            return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+        }
+        
+        // Update user avatar with initials
+        function updateUserAvatar(fullName) {
+            const avatar = document.getElementById('user-avatar');
+            if (avatar) {
+                avatar.textContent = getUserInitials(fullName);
+            }
+        }
+        
+        function showUserProfile() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('profile-user-name').textContent = user.full_name || user.username;
+                document.getElementById('profile-user-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                document.getElementById('profile-user-email').textContent = user.username || user.email || 'N/A';
+                
+                // Update profile modal avatar with initials
+                const modalAvatar = document.getElementById('profile-modal-avatar');
+                if (modalAvatar) {
+                    modalAvatar.textContent = getUserInitials(user.full_name || user.username);
+                }
+            }
+            document.getElementById('userProfileModal').classList.remove('hidden');
+            // Close the dropdown
+            document.getElementById('profile-dropdown').classList.add('hidden');
+        }
+
+        function hideUserProfile() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        // Toggle upload submenu
+        function toggleUploadMenu() {
+            const submenu = document.getElementById('upload-submenu');
+            const arrow = document.getElementById('upload-menu-arrow');
+            
+            if (submenu.classList.contains('hidden')) {
+                submenu.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                submenu.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // System status functionality
+        function updateSystemStatus() {
+            fetch('/api/system-status')
+                .then(response => response.json())
+                .then(data => {
+                    updateStatusElement('watsonx-status', data.watsonx_ai.status, 'WatsonX AI');
+                    updateStatusElement('filenet-status', data.filenet.status, 'FileNet');
+                    updateStatusElement('server-status', data.server.status, 'Server');
+                    
+                    // Update last updated time
+                    const lastUpdated = document.getElementById('last-updated');
+                    if (lastUpdated && data.watsonx_ai.last_check) {
+                        const date = new Date(data.watsonx_ai.last_check);
+                        lastUpdated.textContent = `Last updated: ${date.toLocaleTimeString()}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching system status:', error);
+                    // Show error status
+                    updateStatusElement('watsonx-status', 'error', 'WatsonX AI');
+                    updateStatusElement('filenet-status', 'error', 'FileNet');
+                });
+        }
+
+        function updateStatusElement(elementId, status, serviceName) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            // Clear existing content
+            element.innerHTML = '';
+
+            let icon, text, colorClass;
+
+            switch (status) {
+                case 'online':
+                case 'connected':
+                case 'running':
+                    icon = '<i class="fas fa-check-circle mr-1"></i>';
+                    text = status === 'online' ? 'Online' : status === 'connected' ? 'Connected' : 'Running';
+                    colorClass = 'text-green-400';
+                    break;
+                case 'error':
+                    icon = '<i class="fas fa-exclamation-triangle mr-1"></i>';
+                    text = 'Error';
+                    colorClass = 'text-red-400';
+                    break;
+                default:
+                    icon = '<i class="fas fa-question-circle mr-1"></i>';
+                    text = 'Unknown';
+                    colorClass = 'text-yellow-400';
+            }
+
+            element.innerHTML = icon + text;
+            element.className = `text-xs ${colorClass}`;
+        }
+
+        // Initial status check and periodic updates
+        updateSystemStatus();
+        setInterval(updateSystemStatus, 30000); // Update every 30 seconds
+
+        // Authentication functions
+        function checkAuth() {
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            
+            if (!user || !token) {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            try {
+                const userData = JSON.parse(user);
+                document.getElementById('user-name').textContent = userData.full_name || userData.username;
+                document.getElementById('user-role').textContent = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+                
+                // Update user avatar with initials
+                updateUserAvatar(userData.full_name || userData.username);
+                
+                // Show/hide admin-only menus based on role
+                const userManagementMenu = document.getElementById('user-management-menu');
+                const acceConsoleMenu = document.getElementById('acce-console-menu');
+                
+                if (userData.role === 'admin') {
+                    if (userManagementMenu) userManagementMenu.classList.remove('hidden');
+                    if (acceConsoleMenu) acceConsoleMenu.classList.remove('hidden');
+                } else {
+                    if (userManagementMenu) userManagementMenu.classList.add('hidden');
+                    if (acceConsoleMenu) acceConsoleMenu.classList.add('hidden');
+                }
+                
+                return true;
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                window.location.href = '/login';
+                return false;
+            }
+        }
+
+        async function logout() {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                // Clear local storage and redirect
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // For web requests, we rely on server-side authentication
+            // The server will redirect to login if not authenticated
+            const user = localStorage.getItem('user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    document.getElementById('user-name').textContent = userData.full_name || userData.username;
+                    document.getElementById('user-role').textContent = userData.role.charAt(0).toUpperCase() + userData.role.slice(1);
+                    
+                    // Update user avatar with initials
+                    updateUserAvatar(userData.full_name || userData.username);
+                    
+                    // Show/hide admin-only menus based on role
+                    const userManagementMenu = document.getElementById('user-management-menu');
+                    const acceConsoleMenu = document.getElementById('acce-console-menu');
+                    
+                    if (userData.role === 'admin') {
+                        if (userManagementMenu) userManagementMenu.classList.remove('hidden');
+                        if (acceConsoleMenu) acceConsoleMenu.classList.remove('hidden');
+                    } else {
+                        if (userManagementMenu) userManagementMenu.classList.add('hidden');
+                        if (acceConsoleMenu) acceConsoleMenu.classList.add('hidden');
+                    }
+                    
+                    // Show/hide module access based on user permissions
+                    const uploadMenu = document.querySelector('button[onclick="toggleUploadMenu()"]').parentElement;
+                    const ghostlayerMenu = document.querySelector('a[href="/ghostlayer-ai"]');
+                    
+                    // Hide Upload Documents menu if user doesn't have AI Classification access
+                    if (!userData.ai_classification_access && uploadMenu) {
+                        uploadMenu.style.display = 'none';
+                    }
+                    
+                    // Hide GhostLayer AI menu if user doesn't have GhostLayer access
+                    if (!userData.ghostlayer_access && ghostlayerMenu) {
+                        ghostlayerMenu.style.display = 'none';
+                    }
+                    
+                    // Show password change notification if user hasn't changed default password
+                    if (userData.has_changed_default_password === false) {
+                        showPasswordChangeNotification();
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            }
+        });
+
+        // Add token to all fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+            return originalFetch(url, options);
+        };
+        
+        // Password change notification functions
+        function showPasswordChangeNotification() {
+            document.getElementById('passwordChangeNotification').classList.remove('hidden');
+        }
+
+        function hidePasswordChangeNotification() {
+            document.getElementById('passwordChangeNotification').classList.add('hidden');
+        }
+
+        function showPasswordChangeModal() {
+            document.getElementById('passwordChangeModal').classList.remove('hidden');
+        }
+
+        function hidePasswordChangeModal() {
+            document.getElementById('passwordChangeModal').classList.add('hidden');
+            // Clear form
+            document.getElementById('passwordChangeForm').reset();
+            hidePasswordChangeError();
+        }
+
+        function showPasswordChangeError(message) {
+            const errorDiv = document.getElementById('passwordChangeError');
+            const errorText = document.getElementById('passwordChangeErrorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hidePasswordChangeError() {
+            document.getElementById('passwordChangeError').classList.add('hidden');
+        }
+
+        // Profile password change functions
+        function showProfilePasswordError(message) {
+            const errorDiv = document.getElementById('profilePasswordError');
+            const errorText = document.getElementById('profilePasswordErrorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideProfilePasswordError() {
+            document.getElementById('profilePasswordError').classList.add('hidden');
+        }
+
+        // Password visibility toggles for profile form
+        function toggleProfileCurrentPasswordVisibility() {
+            const passwordInput = document.getElementById('profileCurrentPassword');
+            const eyeIcon = document.getElementById('profileCurrentPasswordEyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleProfileNewPasswordVisibility() {
+            const passwordInput = document.getElementById('profileNewPassword');
+            const eyeIcon = document.getElementById('profileNewPasswordEyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        function toggleProfileConfirmNewPasswordVisibility() {
+            const passwordInput = document.getElementById('profileConfirmNewPassword');
+            const eyeIcon = document.getElementById('profileConfirmNewPasswordEyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                showPasswordChangeError('New passwords do not match');
+                return;
+            }
+            
+            // Validate password length
+            if (newPassword.length < 6) {
+                showPasswordChangeError('New password must be at least 6 characters long');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Password changed successfully
+                    hidePasswordChangeModal();
+                    hidePasswordChangeNotification();
+                    
+                    // Update user data in localStorage
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    user.has_changed_default_password = true;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    
+                    alert('Password changed successfully!');
+                } else {
+                    showPasswordChangeError(data.message || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Password change error:', error);
+                showPasswordChangeError('Network error. Please try again.');
+            }
+        }
+        
+        // Toast Notification System
+        function showToast(type, title, message, duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toastId = Date.now() + Math.random();
+            const toast = createToast(toastId, type, title, message, duration);
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Auto remove
+            if (duration > 0) {
+                setTimeout(() => removeToast(toastId), duration);
+            }
+            
+            return toastId;
+        }
+
+        function createToast(id, type, title, message, duration) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.dataset.toastId = id;
+
+            const iconMap = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-triangle',
+                warning: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="${iconMap[type] || 'fas fa-info-circle'}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast(${id})">
+                    <i class="fas fa-times"></i>
+                </button>
+                ${duration > 0 ? `<div class="toast-progress" style="width: 100%; animation: progress ${duration}ms linear forwards;"></div>` : ''}
+            `;
+
+            return toast;
+        }
+
+        function removeToast(id) {
+            const toast = document.querySelector(`[data-toast-id="${id}"]`);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        // Add form event listener
+        // Profile password change handler
+        async function handleProfilePasswordChange(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('profileCurrentPassword').value;
+            const newPassword = document.getElementById('profileNewPassword').value;
+            const confirmPassword = document.getElementById('profileConfirmNewPassword').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showProfilePasswordError('Please fill in all fields');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showProfilePasswordError('New passwords do not match');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showProfilePasswordError('New password must be at least 6 characters long');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    hideUserProfile();
+                    // Show success message using toast notification
+                    showToast('success', 'Password Changed', 'Your password has been updated successfully!');
+                } else {
+                    showProfilePasswordError(data.message || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Profile password change error:', error);
+                showProfilePasswordError('Network error. Please try again.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordChangeForm = document.getElementById('passwordChangeForm');
+            if (passwordChangeForm) {
+                passwordChangeForm.addEventListener('submit', handlePasswordChange);
+            }
+            
+            const profilePasswordForm = document.getElementById('profilePasswordForm');
+            if (profilePasswordForm) {
+                profilePasswordForm.addEventListener('submit', handleProfilePasswordChange);
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

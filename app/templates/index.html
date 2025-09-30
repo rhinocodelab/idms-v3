@@ -1,0 +1,617 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - IDMS{% endblock %}
+
+{% block page_title %}My Dashboard{% endblock %}
+{% block page_subtitle %}Your personal document processing overview{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Password Change Notification -->
+    <div id="passwordChangeNotification" class="hidden bg-orange-50 border-l-4 border-orange-400 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-orange-400"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-orange-700">
+                    <strong>Security Notice:</strong> For your account security, please change your default password. 
+                    <button onclick="showPasswordChangeModal()" class="ml-2 text-orange-800 underline hover:text-orange-900">
+                        Change Password Now
+                    </button>
+                </p>
+            </div>
+            <div class="ml-auto pl-3">
+                <div class="-mx-1.5 -my-1.5">
+                    <button onclick="hidePasswordChangeNotification()" class="inline-flex bg-orange-50 rounded-md p-1.5 text-orange-500 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-orange-50 focus:ring-orange-600">
+                        <span class="sr-only">Dismiss</span>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Statistics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-file-alt text-xl text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">My Total Documents</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="dashboard-total-docs">--</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        AI: <span id="dashboard-ai-docs">0</span> | GL: <span id="dashboard-gl-docs">0</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <i class="fas fa-calendar-day text-xl text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Uploaded Today</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="dashboard-docs-today">--</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        This week: <span id="dashboard-docs-week">0</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-purple-100 p-3 rounded-lg">
+                    <i class="fas fa-check-circle text-xl text-purple-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">My Success Rate</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="dashboard-success-rate">--</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-orange-100 p-3 rounded-lg">
+                    <i class="fas fa-hdd text-xl text-orange-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">My Storage Used</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="dashboard-storage">--</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 shadow-sm border border-blue-700 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-2">
+                    <i class="fas fa-bolt mr-2"></i>Quick Actions
+                </h3>
+                <p class="text-sm text-blue-100">Fast access to document upload features</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/upload#ai-classification" class="bg-white text-blue-600 px-4 py-2 hover:bg-blue-50 transition-colors inline-flex items-center">
+                    <i class="fas fa-brain mr-2"></i>
+                    AI Classification
+                </a>
+                <a href="/ghostlayer-ai" class="bg-purple-700 text-white px-4 py-2 hover:bg-purple-800 transition-colors inline-flex items-center">
+                    <i class="fas fa-ghost mr-2"></i>
+                    GhostLayer OCR
+                </a>
+                <a href="/analytics" class="bg-blue-700 text-white px-4 py-2 hover:bg-blue-800 transition-colors inline-flex items-center">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    View Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Recent Uploads -->
+    <div class="bg-white shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-history mr-2"></i>My Recent Uploads
+            </h2>
+            <button onclick="refreshRecentUploads()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <i class="fas fa-sync-alt mr-1"></i>Refresh
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Document</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criticality</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uploaded</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-uploads-table" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Loading your recent uploads...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- My Document Types -->
+    <div class="bg-white shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-chart-pie mr-2"></i>My Document Types
+            </h3>
+            <a href="/analytics" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                View Full Analytics <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+        <div id="document-types-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div class="text-center text-gray-500 py-4">
+                <i class="fas fa-spinner fa-spin mr-2"></i>Loading...
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Password Change Modal -->
+<div id="passwordChangeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-key mr-2 text-orange-600"></i>Change Default Password
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="flex items-start mb-4">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-orange-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-medium text-gray-900">Security Requirement</h4>
+                        <p class="text-sm text-gray-700 mt-1">
+                            For security reasons, you must change your default password before continuing to use the system.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-lock mr-2"></i>New Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="newPassword" 
+                               class="w-full px-3 py-2 border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Enter new password">
+                        <button type="button" id="toggleNewPassword" onclick="toggleNewPasswordVisibility()" 
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="newPasswordEyeIcon" class="fas fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-lock mr-2"></i>Confirm New Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" 
+                               class="w-full px-3 py-2 border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Confirm new password">
+                        <button type="button" id="toggleConfirmPassword" onclick="toggleConfirmPasswordVisibility()" 
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <i id="confirmPasswordEyeIcon" class="fas fa-eye text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="passwordChangeError" class="hidden bg-red-50 border border-red-200 p-2 text-red-700 text-sm mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span id="passwordChangeErrorText"></span>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hidePasswordChangeModal()" 
+                            class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="button" id="changePassword" 
+                            class="px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 transition-colors">
+                        <i class="fas fa-key mr-2"></i>Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Preview chart instances
+let previewDocTypesChart, previewCriticalityChart;
+
+// Load personalized dashboard metrics
+async function loadDashboardMetrics() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/dashboard-metrics', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('Error loading dashboard metrics:', data.error);
+            return;
+        }
+        
+        // Update KPI cards with user-specific data
+        document.getElementById('dashboard-total-docs').textContent = data.total_documents || 0;
+        document.getElementById('dashboard-ai-docs').textContent = data.total_ai_documents || 0;
+        document.getElementById('dashboard-gl-docs').textContent = data.total_ghostlayer_documents || 0;
+        document.getElementById('dashboard-docs-today').textContent = data.documents_today || 0;
+        document.getElementById('dashboard-docs-week').textContent = data.documents_this_week || 0;
+        document.getElementById('dashboard-success-rate').textContent = (data.success_rate || 0) + '%';
+        
+        // Format storage
+        const storageMB = ((data.total_storage || 0) / 1024 / 1024).toFixed(2);
+        document.getElementById('dashboard-storage').textContent = storageMB + ' MB';
+        
+        // Load document types
+        loadDocumentTypes(data.document_types || []);
+        
+        // Load recent uploads
+        loadRecentUploads(data.recent_uploads || []);
+        
+    } catch (error) {
+        console.error('Error loading dashboard metrics:', error);
+    }
+}
+
+// Load user's document types
+function loadDocumentTypes(types) {
+    const container = document.getElementById('document-types-list');
+    
+    if (types.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center text-gray-500 py-4">
+                <i class="fas fa-inbox mr-2"></i>No documents uploaded yet
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = types.map(type => `
+        <div class="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 p-4 text-center hover:shadow-md transition-shadow">
+            <div class="text-2xl font-bold text-blue-600 mb-1">${type.count}</div>
+            <div class="text-xs text-gray-700 font-medium truncate" title="${type.name}">${type.name}</div>
+        </div>
+    `).join('');
+}
+
+// Load user's recent uploads
+function loadRecentUploads(uploads) {
+    const tbody = document.getElementById('recent-uploads-table');
+    
+    if (uploads.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-inbox mr-2"></i>No uploads yet. Start by uploading your first document!
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = uploads.map(doc => {
+        const statusClass = {
+            'completed': 'bg-green-100 text-green-800',
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'processing': 'bg-blue-100 text-blue-800',
+            'failed': 'bg-red-100 text-red-800'
+        }[doc.status] || 'bg-gray-100 text-gray-800';
+        
+        const sourceClass = doc.source === 'AI Classification' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
+        const sourceIcon = doc.source === 'AI Classification' ? 'fa-brain' : 'fa-ghost';
+        
+        const criticalityBadge = doc.criticality ? `
+            <span class="px-2 py-1 text-xs font-semibold rounded-full ${getCriticalityClass(doc.criticality)}">
+                ${doc.criticality}
+            </span>
+        ` : '<span class="text-gray-400 text-xs">N/A</span>';
+        
+        const timeAgo = getTimeAgo(doc.timestamp);
+        const sizeMB = ((doc.size || 0) / 1024 / 1024).toFixed(2);
+        
+        return `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">
+                    <div class="text-sm font-medium text-gray-900">${doc.name}</div>
+                    <div class="text-xs text-gray-500">${sizeMB} MB</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-700">${doc.type || 'Unknown'}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${sourceClass}">
+                        <i class="fas ${sourceIcon} mr-1"></i>${doc.source}
+                    </span>
+                </td>
+                <td class="px-4 py-3">${criticalityBadge}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                        ${doc.status}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-500">${timeAgo}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getCriticalityClass(criticality) {
+    const classes = {
+        'Public': 'bg-green-100 text-green-800',
+        'Confidential': 'bg-yellow-100 text-yellow-800',
+        'Restricted': 'bg-orange-100 text-orange-800',
+        'Top Secret': 'bg-red-100 text-red-800',
+        'Classified': 'bg-purple-100 text-purple-800'
+    };
+    return classes[criticality] || 'bg-gray-100 text-gray-800';
+}
+
+function refreshRecentUploads() {
+    loadDashboardMetrics();
+}
+
+// Get appropriate file icon based on file type
+function getFileIcon(fileType) {
+    const iconMap = {
+        '.pdf': 'fas fa-file-pdf',
+        '.docx': 'fas fa-file-word',
+        '.doc': 'fas fa-file-word',
+        '.xlsx': 'fas fa-file-excel',
+        '.xls': 'fas fa-file-excel',
+        '.csv': 'fas fa-file-csv',
+        '.png': 'fas fa-file-image',
+        '.jpg': 'fas fa-file-image',
+        '.jpeg': 'fas fa-file-image',
+        '.zip': 'fas fa-file-archive',
+        '.7z': 'fas fa-file-archive',
+        '.rar': 'fas fa-file-archive',
+        '.json': 'fas fa-file-code',
+        '.yaml': 'fas fa-file-code',
+        '.yml': 'fas fa-file-code'
+    };
+    
+    return iconMap[fileType?.toLowerCase()] || 'fas fa-file';
+}
+
+// Get icon color class based on file type
+function getFileIconColor(fileType) {
+    const colorMap = {
+        '.pdf': 'bg-red-100 text-red-600',
+        '.docx': 'bg-blue-100 text-blue-600',
+        '.doc': 'bg-blue-100 text-blue-600',
+        '.xlsx': 'bg-green-100 text-green-600',
+        '.xls': 'bg-green-100 text-green-600',
+        '.csv': 'bg-yellow-100 text-yellow-600',
+        '.png': 'bg-purple-100 text-purple-600',
+        '.jpg': 'bg-purple-100 text-purple-600',
+        '.jpeg': 'bg-purple-100 text-purple-600',
+        '.zip': 'bg-orange-100 text-orange-600',
+        '.7z': 'bg-orange-100 text-orange-600',
+        '.rar': 'bg-orange-100 text-orange-600',
+        '.json': 'bg-gray-100 text-gray-600',
+        '.yaml': 'bg-gray-100 text-gray-600',
+        '.yml': 'bg-gray-100 text-gray-600'
+    };
+    
+    return colorMap[fileType?.toLowerCase()] || 'bg-gray-100 text-gray-600';
+}
+
+// Calculate time ago from timestamp
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} seconds ago`;
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardMetrics();
+    
+    // Refresh metrics every 30 seconds
+    setInterval(() => {
+        loadDashboardMetrics();
+    }, 30000);
+
+    // Check if user needs to change password
+    checkPasswordChangeRequirement();
+});
+
+// Password Change Functions
+function checkPasswordChangeRequirement() {
+    const user = localStorage.getItem('user');
+    console.log('Checking password change requirement...');
+    console.log('User data from localStorage:', user);
+    
+    if (user) {
+        try {
+            const userData = JSON.parse(user);
+            console.log('Parsed user data:', userData);
+            console.log('has_changed_default_password:', userData.has_changed_default_password);
+            console.log('Type of has_changed_default_password:', typeof userData.has_changed_default_password);
+            
+            if (userData.has_changed_default_password === false || userData.has_changed_default_password === 0) {
+                console.log('Password change required - showing notification');
+                showPasswordChangeNotification();
+            } else {
+                console.log('Password change not required');
+            }
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+    } else {
+        console.log('No user data found in localStorage');
+    }
+}
+
+function showPasswordChangeNotification() {
+    console.log('showPasswordChangeNotification called');
+    const notification = document.getElementById('passwordChangeNotification');
+    console.log('Notification element:', notification);
+    if (notification) {
+        notification.classList.remove('hidden');
+        console.log('Password change notification should now be visible');
+    } else {
+        console.error('Password change notification element not found!');
+    }
+}
+
+function hidePasswordChangeNotification() {
+    document.getElementById('passwordChangeNotification').classList.add('hidden');
+}
+
+function showPasswordChangeModal() {
+    document.getElementById('passwordChangeModal').classList.remove('hidden');
+}
+
+function hidePasswordChangeModal() {
+    document.getElementById('passwordChangeModal').classList.add('hidden');
+    // Clear form
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    hidePasswordChangeError();
+}
+
+function toggleNewPasswordVisibility() {
+    const passwordInput = document.getElementById('newPassword');
+    const eyeIcon = document.getElementById('newPasswordEyeIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+function toggleConfirmPasswordVisibility() {
+    const passwordInput = document.getElementById('confirmPassword');
+    const eyeIcon = document.getElementById('confirmPasswordEyeIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
+function showPasswordChangeError(message) {
+    const errorDiv = document.getElementById('passwordChangeError');
+    const errorText = document.getElementById('passwordChangeErrorText');
+    errorText.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+function hidePasswordChangeError() {
+    document.getElementById('passwordChangeError').classList.add('hidden');
+}
+
+async function changePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!newPassword || !confirmPassword) {
+        showPasswordChangeError('Please fill in all fields');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showPasswordChangeError('Passwords do not match');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showPasswordChangeError('Password must be at least 6 characters long');
+        return;
+    }
+    
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const response = await fetch('/api/auth/change-password-initial', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: user.id,
+                new_password: newPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            hidePasswordChangeModal();
+            hidePasswordChangeNotification();
+            // Update user data in localStorage
+            user.has_changed_default_password = true;
+            localStorage.setItem('user', JSON.stringify(user));
+            // Show success message
+            alert('Password changed successfully!');
+        } else {
+            showPasswordChangeError(data.message || 'Failed to change password');
+        }
+    } catch (error) {
+        console.error('Password change error:', error);
+        showPasswordChangeError('Network error. Please try again.');
+    }
+}
+
+// Event listener for password change button
+document.getElementById('changePassword').addEventListener('click', changePassword);
+</script>
+{% endblock %}

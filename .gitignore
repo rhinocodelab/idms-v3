@@ -1,0 +1,122 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+app/idms.db
+idms.db
+app/app/idms.db
+
+# Environment Variables (SENSITIVE - DO NOT COMMIT)
+.env
+*.env
+app/.env
+
+# GCP Credentials (SENSITIVE - DO NOT COMMIT)
+ghostlayer.json
+isl.json
+
+# Configuration Files with Secrets
+ghostlayer_ocr.ini
+
+# Temporary Files
+temp/
+tmp/
+app/temp/
+app/app/temp/
+
+# Upload Directories
+upload_ghostlayer_docs/
+app/upload_ghostlayer_docs/
+app/app/upload_ghostlayer_docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.pydevproject
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# Logs
+*.log
+logs/
+app/logs/
+
+# Test Files
+test_*.py
+*_test.py
+tests/
+
+# Documentation Build
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Sample files (optional - uncomment if you don't want to commit)
+# app/sample_files/
+
+# QR codes (temporary MFA setup files)
+app/temp/mfa_qr_*.png
+temp/mfa_qr_*.png
