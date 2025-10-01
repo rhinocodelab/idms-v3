@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <base href="">
+    <meta charset="utf-8" />
+    <title>VSK - Dashboard</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!--begin::Fonts-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+    <!--end::Fonts-->
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+   
+    <link href="css/dbdsm.css" rel="stylesheet" type="text/css" />
+    <link href="css/style.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="css/light.css" rel="stylesheet" type="text/css" />
+    <link href="css/dark.css" rel="stylesheet" type="text/css" />   
+    <!--<link rel="shortcut icon" href="assets/media/logos/faviconX.ico" />-->
+</head>
+<!--end::Head-->
+<!--begin::Body-->
+<body id="body" class="header-fixed header-mobile-fixed subheader-enabled subheader-fixed aside-enabled aside-fixed aside-minimize-hoverable page-loading">
+    <!--begin::Main-->
+    <div class="d-flex flex-column flex-root">
+        <!--begin::Page-->
+        <div class="d-flex flex-row flex-column-fluid page">
+            <!--begin::Aside-->
+            <div class="aside aside-left aside-fixed d-flex flex-column flex-row-auto" id="kt_aside">
+                <!--begin::Aside Menu-->
+                <h4 class="text-center py-4 text-light">
+                    <img src="img/logo.png" alt="=vsk logo"/>
+
+                </h4>
+                <div class="aside-menu-wrapper flex-column-fluid" id="kt_aside_menu_wrapper">
+                    <!--begin::Menu Container-->
+                    <div id="kt_aside_menu" class="aside-menu" data-menu-vertical="1" data-menu-scroll="1" data-menu-dropdown-timeout="500">
+                        <!--begin::Menu Nav-->
+                        <ul class="menu-nav">
+                            <li class="menu-item menu-item-active" aria-haspopup="true">
+                                <span class="menu-link">
+                                    <a href="#dashboard" class="menu-text" href="dashboard.html">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        Dashboard
+                                    </a>
+                                </span>
+                            </li>
+
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#Student" class="menu-text" href="policymanagement.html">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        Student Attendance Dashboard
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#learning" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        Learning Outcomes Dashboard
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#teacher" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        Teacher Attendance & Registry
+                                    </a>
+                                </span>
+                                <!--<ul class="menu-nav pt-0 pb-0">
+            <li class="menu-item menu-item-submenu pl-10" aria-haspopup="true"><a href="" class="menu-link "><i class="menu-bullet menu-bullet-dot"><span></span></i><span class="menu-text">Audit Logs</span></a></li>
+            <li class="menu-item menu-item-submenu pl-10" aria-haspopup="true"><a href="" class="menu-link "><i class="menu-bullet menu-bullet-dot"><span></span></i><span class="menu-text">forensic View Logs</span></a></li>
+        </ul>-->
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#infra" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        School Infrastructure & Certification 
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#dbt" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span> 
+                                        DBT Monitoring 
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#ict" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span> 
+                                        ICT & Digital Initiatives 
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#meal" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span> 
+                                        Mid-Day Meal Monitoring 
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#field" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span> 
+                                        Field Inspection & Monitoring 
+                                    </a>
+                                </span>
+                            </li>
+                            <li class="menu-item menu-item">
+                                <span class="menu-link">
+                                    <a href="#capacity" class="menu-text">
+                                        <span class="svg-icon menu-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <polygon points="0 0 24 0 24 24 0 24" />
+                                                    <path d="M12.9336061,16.072447 L19.36,10.9564761 L19.5181585,10.8312381 C20.1676248,10.3169571 20.2772143,9.3735535 19.7629333,8.72408713 C19.6917232,8.63415859 19.6104327,8.55269514 19.5206557,8.48129411 L12.9336854,3.24257445 C12.3871201,2.80788259 11.6128799,2.80788259 11.0663146,3.24257445 L4.47482784,8.48488609 C3.82645598,9.00054628 3.71887192,9.94418071 4.23453211,10.5925526 C4.30500305,10.6811601 4.38527899,10.7615046 4.47382636,10.8320511 L4.63,10.9564761 L11.0659024,16.0730648 C11.6126744,16.5077525 12.3871218,16.5074963 12.9336061,16.072447 Z" fill="#000000" fill-rule="nonzero" />
+                                                    <path d="M11.0563554,18.6706981 L5.33593024,14.122919 C4.94553994,13.8125559 4.37746707,13.8774308 4.06710397,14.2678211 C4.06471678,14.2708238 4.06234874,14.2738418 4.06,14.2768747 L4.06,14.2768747 C3.75257288,14.6738539 3.82516916,15.244888 4.22214834,15.5523151 C4.22358765,15.5534297 4.2250303,15.55454 4.22647627,15.555646 L11.0872776,20.8031356 C11.6250734,21.2144692 12.371757,21.2145375 12.909628,20.8033023 L19.7677785,15.559828 C20.1693192,15.2528257 20.2459576,14.6784381 19.9389553,14.2768974 C19.9376429,14.2751809 19.9363245,14.2734691 19.935,14.2717619 L19.935,14.2717619 C19.6266937,13.8743807 19.0546209,13.8021712 18.6572397,14.1104775 C18.654352,14.112718 18.6514778,14.1149757 18.6486172,14.1172508 L12.9235044,18.6705218 C12.377022,19.1051477 11.6029199,19.1052208 11.0563554,18.6706981 Z" fill="#000000" opacity="0.3" />
+                                                </g>
+                                            </svg>
+                                        </span>
+                                        Capacity Building (Training)
+                                    </a>
+                                </span>
+                            </li>
+                             
+
+                        </ul>
+                        <!--end::Menu Nav-->
+                    </div>
+                    
+                </div>
+                <!--end::Aside Menu-->
+            </div>
+            <!--end::Aside-->
+            <!--begin::Wrapper-->
+            <div class="d-flex flex-column flex-row-fluid wrapper py-1" id="wrapper">               
+                <!--begin::Content-->
+                <div class="content d-flex flex-column flex-column-fluid pb-0 pt-3" id="content">
+                    <!--begin::Entry-->
+                    <div class="d-flex flex-column-fluid"> 
+                        <div class="container-fluid">
+                            <div id="dashboard" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/dashboard.png" alt="=vsk dashboard" /></div>
+                            </div>
+                            <div id="Student" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/student.png"  alt="=vsk Student dashboard" /></div>
+                            </div>
+                            <div id="learning" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/learning.png"  alt="=vsk learing dashboard" /></div>
+                            </div>
+                            <div id="teacher" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/teacher.png"  alt="=vsk teacher dashboard" /></div>
+                            </div>
+                            <div id="infra" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/infra.png"  alt="=vsk infrastructure dashboard" /></div>
+                            </div>
+                            <div id="dbt" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/dbt.png"  alt="=vsk dbt dashboard" /></div>
+                            </div>
+                            <div id="ict" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/ict.png" alt="=vsk ict dashboard" /></div>
+                            </div>
+                            <div id="meal" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/meal.png"  alt="=vsk meal dashboard" /></div>
+                            </div>
+                            <div id="field" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/field.png"  alt="=vsk field dashboard" /></div>
+                            </div>
+                            <div id="capacity" style="height:100%;">
+                                <div class="w-100 g-4 mb-3"><img src="img/capacity.png" alt="=vsk capacity dashboard" /></div>
+                            </div>
+
+
+                        </div>
+                        <!--end::Entry-->
+                    </div> 
+                </div>
+                <!--end::Wrapper-->
+            </div>
+            <!--end::Page-->
+        </div>
+        <!--end::Main-->
+        <!--end::Page Scripts-->
+
+        <script>
+            function simulatePolicy() {
+                const name = document.getElementById('policyName').value;
+                const result = `Policy "${name}" will sanitize data if sensitive type is accessed over threshold outside business hours.`;
+                document.getElementById('policyPreview').innerText = result;
+            }
+            function heatmap() {
+                const heatmapCtx = document.getElementById('userHeatmap').getContext('2d');
+                new Chart(heatmapCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['User A', 'User B', 'User C', 'User D'],
+                        datasets: [{
+                            label: 'Risk Score',
+                            data: [65, 59, 80, 81],
+                            backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
+                        }]
+                    },
+                    options: { plugins: { title: { display: true, text: 'User Risk Heatmap' } } }
+                });
+
+                const accessCtx = document.getElementById('accessTrend').getContext('2d');
+                new Chart(accessCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Access Events',
+                            data: [120, 150, 180, 90, 130, 160, 190],
+                            fill: true,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.3
+                        }]
+                    },
+                    options: { plugins: { title: { display: true, text: 'Access Trends (7 Days)' } } }
+                });
+
+            }
+
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                var current_fs, next_fs, previous_fs; //fieldsets
+                var opacity;
+                var current = 1;
+                var steps = $("fieldset").length;
+
+                setProgressBar(current);
+
+                $(".next").click(function () {
+
+                    current_fs = $(this).parent();
+                    next_fs = $(this).parent().next();
+
+                    //Add Class Active
+                    $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+                    //show the next fieldset
+                    next_fs.show();
+                    //hide the current fieldset with style
+                    current_fs.animate({ opacity: 0 }, {
+                        step: function (now) {
+                            // for making fielset appear animation
+                            opacity = 1 - now;
+
+                            current_fs.css({
+                                'display': 'none',
+                                'position': 'relative'
+                            });
+                            next_fs.css({ 'opacity': opacity });
+                        },
+                        duration: 500
+                    });
+                    setProgressBar(++current);
+                });
+
+                $(".previous").click(function () {
+
+                    current_fs = $(this).parent();
+                    previous_fs = $(this).parent().prev();
+
+                    //Remove class active
+                    $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+                    //show the previous fieldset
+                    previous_fs.show();
+
+                    //hide the current fieldset with style
+                    current_fs.animate({ opacity: 0 }, {
+                        step: function (now) {
+                            // for making fielset appear animation
+                            opacity = 1 - now;
+
+                            current_fs.css({
+                                'display': 'none',
+                                'position': 'relative'
+                            });
+                            previous_fs.css({ 'opacity': opacity });
+                        },
+                        duration: 500
+                    });
+                    setProgressBar(--current);
+                });
+
+                function setProgressBar(curStep) {
+                    var percent = parseFloat(100 / steps) * curStep;
+                    percent = percent.toFixed();
+                    $(".progress-bar")
+                        .css("width", percent + "%")
+                }
+
+                $(".submit").click(function () {
+                    return false;
+                })
+
+            });
+        </script>
+
+
+
+        <!--breach chart-->
+        <script>
+            const pchart = document.getElementById('breachPieChart').getContext('2d');
+
+            const data2 = {
+                labels: ['Critical', 'High', 'Medium'],
+                datasets: [{
+                    data: [14, 10, 8],
+                    backgroundColor: [
+                        'rgba(220, 16, 0, 0.8)',   // Critical - Red
+                        '#f3722c',
+                        //'rgba(255, 168, 0, 0.8)', // High - Orange
+                        'rgba(11,129,251, 0.8)'  // Medium - Blue
+
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            };
+
+            const options2 = {
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 18
+                        },
+                        formatter: (value, context) => {
+                            const label = context.chart.data.labels[context.dataIndex];
+                            return ` ${value}`;//${ label }:
+                        }
+                    }
+                }
+            };
+
+            new Chart(pchart, {
+                type: 'pie',
+                data: data2,
+                options: options2,
+                plugins: [ChartDataLabels]
+            });
+        </script>
+        <!--Active alerts  chart-->
+        <script>
+            const rctx = document.getElementById('riskPieChart').getContext('2d');
+
+            const data5 = {
+                labels: ['Critical', 'High', 'Medium'],
+                datasets: [{
+                    data: [6, 4, 2],
+                    backgroundColor: ['rgba(220, 16, 0, 0.8)', '#f3722c', 'rgba(11,129,251, 0.8)'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            };
+
+            const options5 = {
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#1e1e2f'
+                        }
+                    },
+
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 16
+                        },
+                        formatter: (value) => value
+                    }
+                }
+            };
+
+            new Chart(rctx, {
+                type: 'pie',
+                data: data5,
+                options: options5,
+                plugins: [ChartDataLabels]
+            });
+        </script>
+        <!--Sanitized  chart-->
+        <script>
+            const Cchart = document.getElementById('columnChart').getContext('2d');
+            new Chart(Cchart, {
+                type: 'bar',
+                data: {
+                    labels: ['Redaction', 'Quarantine', 'Rollback', 'Secure Deletion'],
+                    datasets: [{
+                        label: 'Action Counts',
+                        data: [12, 19, 7, 15], // Replace with your actual data
+                        backgroundColor: ['rgba(220, 16, 0, 0.8)', '#f3722c', '#3699FF', '#38a31f']
+                    }]
+                },
+                options4: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: ''
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 5
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+        <!--Total User chart-->
+        <script>
+            const achart = document.getElementById('areaChart').getContext('2d');
+            new Chart(achart, {
+                type: 'bar',
+                data: {
+                    labels: ['Critical User', 'High Risk User', 'Medium Risk User'],
+                    datasets: [{
+                        label: 'Total Users',
+                        data: [2, 6, 4], // Replace with your actual data
+                        backgroundColor: ['rgba(220, 16, 0, 0.8)', '#f3722c', 'rgba(11,129,251, 0.8)'],
+                        //                        backgroundColor: ['#f94144', '#f3722c', '#43aa8b']
+                    }]
+                },
+                options4: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: ''
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 5
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+        <script>
+            function showDiv(divId) {
+                hideAll();
+                document.getElementById(divId).style.display = 'block';
+
+            }
+
+            function hideAll() {
+                const contents = document.querySelectorAll('.content');
+                contents.forEach(div => div.style.display = 'none');
+            }
+            function highlightBox(element) {
+                const boxes = document.querySelectorAll('.box');
+                boxes.forEach(box => box.classList.remove('highlighted'));
+                element.classList.add('highlighted');
+            }
+
+
+        </script>
+
+        <script>
+            function updateValue(val) {
+                document.getElementById('sliderValue').innerText = +  val + '%' + ' Configuration ';
+            }
+        </script>
+
+        <script>
+            const steps = [
+                { elementId: "step1", text: "Active Alerts" },
+                { elementId: "step2", text: "Active Alerts" },
+                { elementId: "step3", text: "Data Breaches" },
+                { elementId: "step4", text: "Sanitized Records" },
+                { elementId: "step5", text: "Total Users at Risk" },
+                { elementId: "step6", text: "Threat Feed Summary" } 
+            ];
+
+            let currentStep = 0;
+
+            function showStep(index) {
+                const tourOverlay = document.getElementById("tour-overlay");
+                const text = document.getElementById("tour-text");
+
+                // Remove existing highlight
+                document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+
+                if (index >= 0 && index < steps.length) {
+                    const { elementId, text: stepText } = steps[index];
+                    const el = document.getElementById(elementId);
+                    if (el) el.classList.add('highlight');
+                    text.textContent = stepText;
+                    tourOverlay.classList.remove('hidden');
+                }
+            }
+
+            function hideTour() {
+                document.getElementById("tour-overlay").classList.add("hidden");
+                document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+                localStorage.setItem("tourSeen", "true");
+            }
+
+            document.getElementById("next-step").addEventListener("click", () => {
+                currentStep++;
+                if (currentStep < steps.length) {
+                    showStep(currentStep);
+                } else {
+                    hideTour();
+                }
+            });
+
+            document.getElementById("prev-step").addEventListener("click", () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            });
+
+            window.addEventListener("load", () => {
+                const hasSeenTour = localStorage.getItem("tourSeen");
+                if (!hasSeenTour) {
+                    showStep(currentStep);
+                }
+            });
+        </script>
+
+
+        <!--<script>
+            const steps = [
+                { elementId: "step1", text: "1" },
+                { elementId: "step2", text: "2" },
+                { elementId: "step3", text: "3" },
+                { elementId: "step4", text: "4" },
+                { elementId: "step5", text: "5" },
+                { elementId: "step6", text: "6" },
+                { elementId: "step7", text: "7" },
+                { elementId: "step8", text: "8." }
+            ];
+
+            let currentStep = 0;
+
+            function showStep(stepIndex) {
+                const tour = document.getElementById("tour");
+                const text = document.getElementById("tour-text");
+                const highlightId = steps[stepIndex].elementId;
+                const highlightElement = document.getElementById(highlightId);
+
+                // Remove previous highlights
+                document.querySelectorAll(".highlight").forEach(el => el.classList.remove("highlight"));
+
+                text.innerText = steps[stepIndex].text;
+                highlightElement.classList.add("highlight");
+                tour.classList.remove("hidden");
+            }
+
+            function endTour() {
+                document.getElementById("tour").classList.add("hidden");
+                document.querySelectorAll(".highlight").forEach(el => el.classList.remove("highlight"));
+                localStorage.setItem("tourSeen", "true");
+            }
+
+            document.getElementById("next-step").addEventListener("click", () => {
+                currentStep++;
+                if (currentStep < steps.length) {
+                    showStep(currentStep);
+                } else {
+                    endTour();
+                }
+            });
+
+            window.addEventListener("load", () => {
+                const tourSeen = localStorage.getItem("tourSeen");
+                if (!tourSeen) {
+                    showStep(currentStep);
+                }
+            });
+        </script>-->
+
+
+
+    </div>
+
+
+</body>
+<!--end::Body-->
+</html>

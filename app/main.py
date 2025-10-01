@@ -1303,6 +1303,34 @@ async def analytics_page(request: Request):
         return RedirectResponse(url="/login")
     return templates.TemplateResponse("analytics.html", {"request": request, "user": user})
 
+# VSK Static Files Routes
+@app.get("/vsk/{file_path:path}")
+async def vsk_static_files(file_path: str, request: Request):
+    """Serve VSK static files (HTML, CSS, JS, images) - requires authentication"""
+    user = require_auth(request)
+    if not user:
+        return RedirectResponse(url="/login")
+    
+    # Build the full path to the VSK file
+    vsk_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vsk")
+    full_path = os.path.join(vsk_base_path, file_path)
+    
+    # Security check - ensure the file is within the VSK directory
+    if not os.path.commonpath([vsk_base_path, full_path]) == vsk_base_path:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    if not os.path.exists(full_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine content type
+    if file_path.endswith('.html'):
+        with open(full_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        return HTMLResponse(content=content)
+    else:
+        # For CSS, JS, images, etc. - serve as static file
+        return FileResponse(full_path)
+
 @app.get("/ghostlayer-ai", response_class=HTMLResponse)
 async def ghostlayer_page(request: Request):
     """Serve the GhostLayer AI page (requires authentication)"""
