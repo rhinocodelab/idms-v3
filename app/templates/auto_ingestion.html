@@ -168,6 +168,60 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i id="confirmIcon" class="fas fa-question-circle mr-2 text-blue-600"></i>
+                    <span id="confirmTitle">Confirm Action</span>
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <p id="confirmMessage" class="text-gray-700"></p>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+                <button onclick="hideConfirmModal(false)" 
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmButton" onclick="confirmAction()" 
+                        class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Modal -->
+<div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i id="infoIcon" class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    <span id="infoTitle">Information</span>
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <p id="infoMessage" class="text-gray-700 whitespace-pre-line"></p>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 flex justify-end">
+                <button onclick="hideInfoModal()" 
+                        class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Workflow Details Modal -->
 <div id="workflowDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -271,6 +325,40 @@
 {% block extra_scripts %}
 <script>
 let currentWorkflowId = null;
+let confirmCallback = null;
+
+// Modal Helper Functions
+function showConfirmModal(title, message, onConfirm, buttonText = 'Confirm', buttonClass = 'bg-blue-600 hover:bg-blue-700') {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmButton').textContent = buttonText;
+    document.getElementById('confirmButton').className = `px-4 py-2 text-white transition-colors ${buttonClass}`;
+    confirmCallback = onConfirm;
+    document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function hideConfirmModal(execute = false) {
+    document.getElementById('confirmModal').classList.add('hidden');
+    if (execute && confirmCallback) {
+        confirmCallback();
+    }
+    confirmCallback = null;
+}
+
+function confirmAction() {
+    hideConfirmModal(true);
+}
+
+function showInfoModal(title, message, iconClass = 'fa-info-circle', iconColor = 'text-blue-600') {
+    document.getElementById('infoTitle').textContent = title;
+    document.getElementById('infoMessage').textContent = message;
+    document.getElementById('infoIcon').className = `fas ${iconClass} mr-2 ${iconColor}`;
+    document.getElementById('infoModal').classList.remove('hidden');
+}
+
+function hideInfoModal() {
+    document.getElementById('infoModal').classList.add('hidden');
+}
 
 // Load dashboard statistics
 async function loadDashboardStats() {
@@ -439,7 +527,12 @@ function hideWorkflowModal() {
 }
 
 function browseFolder() {
-    alert('Note: For security reasons, web browsers cannot directly browse local folders.\nPlease manually enter the full folder path (e.g., C:\\Documents\\Invoices)');
+    showInfoModal(
+        'Folder Path Information',
+        'Note: For security reasons, web browsers cannot directly browse local folders.\n\nPlease manually enter the full folder path.\n\nExample: C:\\Documents\\Invoices',
+        'fa-folder-open',
+        'text-blue-600'
+    );
 }
 
 // Create/Update workflow
@@ -510,10 +603,18 @@ async function startWorkflow(workflowId) {
 
 // Stop workflow
 async function stopWorkflow(workflowId) {
-    if (!confirm('Are you sure you want to stop this workflow?')) {
-        return;
-    }
-    
+    showConfirmModal(
+        'Stop Workflow',
+        'Are you sure you want to stop this workflow? The current file being processed will be completed first.',
+        async () => {
+            await executeStopWorkflow(workflowId);
+        },
+        'Stop Workflow',
+        'bg-yellow-600 hover:bg-yellow-700'
+    );
+}
+
+async function executeStopWorkflow(workflowId) {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}/stop`, {
@@ -567,10 +668,18 @@ async function editWorkflow(workflowId) {
 
 // Delete workflow
 async function deleteWorkflow(workflowId) {
-    if (!confirm('Are you sure you want to delete this workflow? This action cannot be undone.')) {
-        return;
-    }
-    
+    showConfirmModal(
+        'Delete Workflow',
+        'Are you sure you want to delete this workflow? This action cannot be undone. All queue items and logs associated with this workflow will also be deleted.',
+        async () => {
+            await executeDeleteWorkflow(workflowId);
+        },
+        'Delete Workflow',
+        'bg-red-600 hover:bg-red-700'
+    );
+}
+
+async function executeDeleteWorkflow(workflowId) {
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}`, {
