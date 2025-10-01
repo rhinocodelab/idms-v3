@@ -14,7 +14,7 @@
     </div>
     
     <!-- Database Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="bg-white shadow-sm border border-gray-200 p-6">
             <div class="flex items-center">
                 <div class="bg-blue-100 p-3 rounded-full">
@@ -23,18 +23,6 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Total Documents</p>
                     <p class="text-2xl font-semibold text-gray-900" id="total-documents">--</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center">
-                <div class="bg-green-100 p-3 rounded-full">
-                    <i class="fas fa-upload text-xl text-green-600"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Uploaded Today</p>
-                    <p class="text-2xl font-semibold text-gray-900" id="uploaded-today">--</p>
                 </div>
             </div>
         </div>
@@ -140,7 +128,7 @@
         </div>
         
         <!-- GhostLayer Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <div class="bg-white shadow-sm border border-gray-200 p-6">
                 <div class="flex items-center">
                     <div class="bg-purple-100 p-3 rounded-full">
@@ -149,18 +137,6 @@
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total GhostLayer Docs</p>
                         <p class="text-2xl font-semibold text-gray-900" id="gl-total-documents">--</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-white shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center">
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-calendar-day text-xl text-blue-600"></i>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Uploaded Today</p>
-                        <p class="text-2xl font-semibold text-gray-900" id="gl-docs-today">--</p>
                     </div>
                 </div>
             </div>
@@ -273,7 +249,6 @@ function loadDashboardMetrics() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('total-documents').textContent = data.total_documents || 0;
-            document.getElementById('uploaded-today').textContent = data.processed_today || 0;
             document.getElementById('this-week').textContent = data.documents_this_week || 0;
             // Format storage in MB
             const storageMB = ((data.total_storage || 0) / 1024 / 1024).toFixed(2);
@@ -463,7 +438,6 @@ async function loadGhostLayerStats() {
         
         // Update KPI cards
         document.getElementById('gl-total-documents').textContent = stats.total_documents || 0;
-        document.getElementById('gl-docs-today').textContent = stats.documents_today || 0;
         document.getElementById('gl-docs-week').textContent = stats.documents_this_week || 0;
         
         // Format storage size

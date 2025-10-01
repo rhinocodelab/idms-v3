@@ -28,12 +28,12 @@ env.bak/
 venv.bak/
 
 # Database Files
-*.db
-*.sqlite
-*.sqlite3
-app/idms.db
-idms.db
-app/app/idms.db
+# *.db
+# *.sqlite
+# *.sqlite3
+# app/idms.db
+# idms.db
+# app/app/idms.db
 
 # Environment Variables (SENSITIVE - DO NOT COMMIT)
 .env
@@ -120,3 +120,10 @@ dmypy.json
 # QR codes (temporary MFA setup files)
 app/temp/mfa_qr_*.png
 temp/mfa_qr_*.png
+
+# Script outputs and backups
+scripts/*.db
+scripts/*.sqlite
+scripts/*.backup
+scripts/output/
+scripts/__pycache__/

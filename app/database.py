@@ -5,6 +5,7 @@ SQLite database for storing document processing information, user data, and syst
 
 import sqlite3
 import json
+import os
 from datetime import datetime
 from typing import List, Dict, Optional
 import logging
@@ -13,7 +14,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class IDMSDatabase:
-    def __init__(self, db_path: str = "app/idms.db"):
+    def __init__(self, db_path: str = None):
+        # Default to idms.db in the same directory as this file
+        if db_path is None:
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "idms.db")
         self.db_path = db_path
         self.init_database()
     
