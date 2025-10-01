@@ -201,7 +201,12 @@
 
                 <!-- System Status -->
                 <div class="px-3">
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">System Status</h3>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">System Status</h3>
+                        <button onclick="updateSystemStatus()" class="text-gray-400 hover:text-gray-300 transition-colors" title="Refresh Status">
+                            <i class="fas fa-sync-alt text-xs"></i>
+                        </button>
+                    </div>
                     <div class="space-y-2">
                         <div class="flex items-center justify-between px-4 py-2 bg-gray-800 ">
                             <span class="text-sm text-gray-300">FileNet</span>
@@ -605,9 +610,8 @@
             element.className = `text-xs ${colorClass}`;
         }
 
-        // Initial status check and periodic updates
+        // Initial status check on page load
         updateSystemStatus();
-        setInterval(updateSystemStatus, 30000); // Update every 30 seconds
 
         // Authentication functions
         function checkAuth() {
