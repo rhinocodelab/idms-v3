@@ -2035,6 +2035,8 @@ class IDMSDatabase:
             'ai_docs_today': ai_docs_today,
             'gl_docs_today': gl_docs_today,
             'documents_this_week': ai_docs_week + gl_docs_week,
+            'ai_docs_week': ai_docs_week,
+            'gl_docs_week': gl_docs_week,
             'success_rate': round(success_rate, 1),
             'total_storage': ai_storage + gl_storage,
             'ai_storage': ai_storage,

@@ -19,10 +19,10 @@
                     <p class="text-sm text-gray-600 mt-1">Advanced AI Document Processing and Analysis</p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="showUploadModal()" class="bg-purple-600 text-white px-4 py-2 hover:bg-purple-700 transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Upload Images
+                    <button onclick="showUploadModal()" class="bg-purple-600 text-white px-3 py-1.5 text-sm hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-plus mr-1"></i>Upload Images
                     </button>
-                    <button onclick="showProcessInfoModal()" class="bg-gray-100 text-gray-600 px-3 py-2 hover:bg-gray-200 transition-colors rounded-none" title="GhostLayer Process">
+                    <button onclick="showProcessInfoModal()" class="bg-gray-100 text-gray-600 px-2.5 py-1.5 text-sm hover:bg-gray-200 transition-colors rounded-none" title="GhostLayer Process">
                         <i class="fas fa-info-circle"></i>
                     </button>
                 </div>
@@ -36,21 +36,21 @@
                     <h3 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-table mr-2"></i>Your GhostLayer Documents
                     </h3>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
                         <div class="relative">
                         <input type="text" id="search-input" placeholder="Search images..." 
-                               class="pl-10 pr-4 py-2 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                               class="pl-8 pr-3 py-1.5 text-sm border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <i class="fas fa-search absolute left-2.5 top-2 text-gray-400 text-sm"></i>
                         </div>
-                        <select id="status-filter" class="px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-purple-500">
+                        <select id="status-filter" class="px-3 py-1.5 text-sm border border-gray-300 focus:ring-2 focus:ring-purple-500">
                             <option value="">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
                             <option value="completed">Completed</option>
                             <option value="failed">Failed</option>
                         </select>
-                        <button onclick="refreshData()" class="px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 transition-colors duration-200 flex items-center">
-                            <i class="fas fa-sync-alt mr-2"></i>
+                        <button onclick="refreshData()" class="px-3 py-1.5 text-sm bg-purple-600 text-white hover:bg-purple-700 transition-colors duration-200 flex items-center">
+                            <i class="fas fa-sync-alt mr-1"></i>
                             Refresh
                         </button>
                     </div>
