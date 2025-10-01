@@ -7,9 +7,10 @@
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Main Statistics Cards - Side by Side -->
+    <!-- System Statistics Cards - COMMENTED OUT (Moved to respective pages) -->
+    <!--
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <!-- AI Document Classification Card -->
+        <-- AI Document Classification Card --
         <div class="bg-white shadow-sm border border-gray-200 p-3">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center">
@@ -18,7 +19,7 @@
                     </div>
                     <div class="ml-2">
                         <h2 class="text-sm font-bold text-gray-900">AI Document Classification</h2>
-                        <p class="text-xs text-gray-600">Automated document processing</p>
+                        <p class="text-xs text-gray-600">System Statistics</p>
                     </div>
                 </div>
                 <a href="/upload#ai-classification" class="text-blue-600 hover:text-blue-800 transition-colors" title="Go to AI Document Classification">
@@ -27,39 +28,36 @@
             </div>
             
             <div class="grid grid-cols-3 gap-2">
-                <!-- Total Documents -->
                 <div class="text-center p-2 bg-blue-50 rounded">
                     <i class="fas fa-file-alt text-lg text-blue-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">Total Docs</p>
                     <p class="text-lg font-bold text-blue-600" id="total-documents">--</p>
                 </div>
                 
-                <!-- This Week -->
                 <div class="text-center p-2 bg-purple-50 rounded">
                     <i class="fas fa-calendar-week text-lg text-purple-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">This Week</p>
                     <p class="text-lg font-bold text-purple-600" id="this-week">--</p>
                 </div>
                 
-                <!-- Storage Used -->
                 <div class="text-center p-2 bg-orange-50 rounded">
                     <i class="fas fa-hdd text-lg text-orange-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">Storage</p>
                     <p class="text-lg font-bold text-orange-600" id="storage-used">--</p>
                 </div>
             </div>
-        </div>
-
-        <!-- GhostLayer AI Card -->
+    </div>
+    
+        GhostLayer AI Card 
         <div class="bg-white shadow-sm border border-gray-200 p-3">
             <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center">
+            <div class="flex items-center">
                     <div class="bg-purple-100 p-1.5 rounded-full">
                         <i class="fas fa-ghost text-base text-purple-600"></i>
                     </div>
                     <div class="ml-2">
                         <h2 class="text-sm font-bold text-gray-900">GhostLayer AI</h2>
-                        <p class="text-xs text-gray-600">Document redaction & privacy</p>
+                        <p class="text-xs text-gray-600">System Statistics</p>
                     </div>
                 </div>
                 <a href="/ghostlayer-ai" class="text-purple-600 hover:text-purple-800 transition-colors" title="Go to GhostLayer AI">
@@ -68,21 +66,18 @@
             </div>
             
             <div class="grid grid-cols-3 gap-2">
-                <!-- Total Documents -->
                 <div class="text-center p-2 bg-purple-50 rounded">
                     <i class="fas fa-images text-lg text-purple-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">Total Docs</p>
                     <p class="text-lg font-bold text-purple-600" id="gl-total-documents">--</p>
                 </div>
                 
-                <!-- This Week -->
                 <div class="text-center p-2 bg-green-50 rounded">
                     <i class="fas fa-calendar-week text-lg text-green-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">This Week</p>
                     <p class="text-lg font-bold text-green-600" id="gl-docs-week">--</p>
                 </div>
                 
-                <!-- Storage Used -->
                 <div class="text-center p-2 bg-orange-50 rounded">
                     <i class="fas fa-hdd text-lg text-orange-600 mb-0.5"></i>
                     <p class="text-xs font-medium text-gray-600">Storage</p>
@@ -91,11 +86,834 @@
             </div>
         </div>
     </div>
+    -->
+    <!-- END COMMENTED SECTION -->
+
+    <!-- Haryana State Department Tabs -->
+    <div class="bg-white shadow-sm border border-gray-200">
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px overflow-x-auto" aria-label="Department Tabs">
+                <button onclick="switchDepartmentTab('home-police')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+                        data-tab="home-police">
+                    <i class="fas fa-shield-alt mr-2"></i>Home / Police
+                </button>
+                <button onclick="switchDepartmentTab('health')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="health">
+                    <i class="fas fa-heartbeat mr-2"></i>Health & Family Welfare
+                </button>
+                <button onclick="switchDepartmentTab('education')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="education">
+                    <i class="fas fa-graduation-cap mr-2"></i>Education
+                </button>
+                <button onclick="switchDepartmentTab('transport')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="transport">
+                    <i class="fas fa-car mr-2"></i>Transport & Mobility
+                </button>
+                <button onclick="switchDepartmentTab('revenue')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="revenue">
+                    <i class="fas fa-coins mr-2"></i>Revenue & Social Justice
+                </button>
+                <button onclick="switchDepartmentTab('disaster')" 
+                        class="dept-tab-btn whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        data-tab="disaster">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Disaster Management
+                </button>
+            </nav>
+        </div>
+        
+        <!-- Tab Content Area -->
+        <div class="p-6">
+            <!-- Home / Police Tab -->
+            <div id="home-police-tab" class="dept-tab-content">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- FIRs (7d) -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">FIRs (7d)</div>
+                        <div class="text-3xl font-bold mb-1">1,128</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+4.1%
+                        </div>
+            </div>
+                    
+                    <!-- Avg. Response Time -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Avg. response time</div>
+                        <div class="text-3xl font-bold mb-1">9.6m</div>
+                        <div class="text-xs text-red-400">
+                            <i class="fas fa-arrow-down mr-1"></i>-1.3m
+            </div>
+        </div>
+
+                    <!-- e-Challans Issued -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">e-Challans issued</div>
+                        <div class="text-3xl font-bold mb-1">18,240</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+6.7%
+                        </div>
+            </div>
+                    
+                    <!-- Case Clearance -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Case clearance</div>
+                        <div class="text-3xl font-bold mb-1">71.5%</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+2.9%
+            </div>
+        </div>
+    </div>
+
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Crime Types (Monthly) - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Crime Types (Monthly)</h3>
+                        <div class="space-y-3">
+                            <!-- Theft -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Theft</span>
+                                    <span>245 cases</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Assault -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Assault</span>
+                                    <span>178 cases</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cyber -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Cyber</span>
+                                    <span>312 cases</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Traffic -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Traffic</span>
+                                    <span>425 cases</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full" style="width: 100%"></div>
+                                </div>
+        </div>
+        
+                            <!-- Narcotics -->
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span>Narcotics</span>
+                                    <span>89 cases</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-8 relative overflow-hidden">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full" style="width: 22%"></div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+                    <!-- Hotspots (Last 14 days) - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Hotspots (Last 14 days)</h3>
+                        <div class="space-y-3">
+                            <!-- Gurugram SEC-29 -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">Gurugram SEC-29</div>
+                                    <div class="text-xs text-gray-400">64 incidents</div>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                    Patrol
+                                </span>
+                            </div>
+                            
+                            <!-- Faridabad NIT -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">Faridabad NIT</div>
+                                    <div class="text-xs text-gray-400">51 incidents</div>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                    Under watch
+                                </span>
+                            </div>
+                            
+                            <!-- Panipat City -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">Panipat City</div>
+                                    <div class="text-xs text-gray-400">33 incidents</div>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                    Escalated
+                                </span>
+                            </div>
+                            
+                            <!-- Hisar Cant. -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">Hisar Cant.</div>
+                                    <div class="text-xs text-gray-400">28 incidents</div>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-900 text-blue-300 border border-blue-700">
+                                    Normal
+                                </span>
+                            </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+            <!-- Health Tab -->
+            <div id="health-tab" class="dept-tab-content hidden">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- OPD visits (week) -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">OPD visits (week)</div>
+                        <div class="text-3xl font-bold mb-1">3.2L</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+3.4%
+                        </div>
+                    </div>
+                    
+                    <!-- Bed occupancy -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Bed occupancy</div>
+                        <div class="text-3xl font-bold mb-1">78%</div>
+                        <div class="text-xs text-orange-400">
+                            within band
+                        </div>
+                    </div>
+                    
+                    <!-- Maternal health (ANC4) -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Maternal health (ANC4)</div>
+                        <div class="text-3xl font-bold mb-1">83%</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+2%
+                        </div>
+                </div>
+                    
+                    <!-- Stock-out alerts -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Stock-out alerts</div>
+                        <div class="text-3xl font-bold mb-1">12</div>
+                        <div class="text-xs text-red-400">
+                            act now
+                </div>
+            </div>
+        </div>
+        
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Program Analytics - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Program Analytics</h3>
+                        <div class="relative h-64">
+                            <!-- Simple line chart representation -->
+                            <svg class="w-full h-full" viewBox="0 0 700 250" preserveAspectRatio="none">
+                                <!-- Grid lines -->
+                                <line x1="0" y1="50" x2="700" y2="50" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="100" x2="700" y2="100" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="150" x2="700" y2="150" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="200" x2="700" y2="200" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                
+                                <!-- Area chart path -->
+                                <defs>
+                                    <linearGradient id="healthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Area fill -->
+                                <path d="M 0 180 L 100 160 L 200 155 L 300 140 L 400 135 L 500 125 L 600 115 L 700 105 L 700 250 L 0 250 Z" 
+                                      fill="url(#healthGradient)"/>
+                                
+                                <!-- Line -->
+                                <path d="M 0 180 L 100 160 L 200 155 L 300 140 L 400 135 L 500 125 L 600 115 L 700 105" 
+                                      stroke="#60a5fa" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Facility Alerts - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Facility Alerts</h3>
+                        <div class="space-y-4">
+                            <div class="text-xs text-gray-400 grid grid-cols-3 gap-2 pb-2 border-b border-gray-700">
+                                <span>Facility</span>
+                                <span>Issue</span>
+                                <span class="text-right">Priority</span>
+                            </div>
+                            
+                            <!-- PGIMS Rohtak -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">PGIMS Rohtak</div>
+                                <div class="text-xs text-gray-400">Oxygen audit</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                        High
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Ambala CHC -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Ambala CHC</div>
+                                <div class="text-xs text-gray-400">Vaccine cold-chain</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                        Critical
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Jind PHC -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Jind PHC</div>
+                                <div class="text-xs text-gray-400">Pharma stock</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                        Medium
+                                    </span>
+                                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <!-- Education Tab -->
+            <div id="education-tab" class="dept-tab-content hidden">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Attendance -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Attendance</div>
+                        <div class="text-3xl font-bold mb-1">91.4%</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+0.8%
+                        </div>
+            </div>
+                    
+                    <!-- Assessments on-track -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Assessments on-track</div>
+                        <div class="text-3xl font-bold mb-1">88%</div>
+                        <div class="text-xs text-yellow-400">
+                            stable
+            </div>
+        </div>
+
+                    <!-- Scholarship verifications -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Scholarship verifications</div>
+                        <div class="text-3xl font-bold mb-1">24,510</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+5.2%
+                        </div>
+            </div>
+                    
+                    <!-- Drop-out risk -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Drop-out risk</div>
+                        <div class="text-3xl font-bold mb-1">3.1%</div>
+                        <div class="text-xs text-red-400">
+                            <i class="fas fa-arrow-down mr-1"></i>-0.4%
+            </div>
+        </div>
+    </div>
+
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Student Lifecycle Analytics - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Student Lifecycle Analytics</h3>
+                        <div class="relative h-64">
+                            <!-- Area chart -->
+                            <svg class="w-full h-full" viewBox="0 0 700 250" preserveAspectRatio="none">
+                                <!-- Grid lines -->
+                                <line x1="0" y1="50" x2="700" y2="50" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="100" x2="700" y2="100" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="150" x2="700" y2="150" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="200" x2="700" y2="200" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                
+                                <!-- Area chart gradient -->
+                                <defs>
+                                    <linearGradient id="eduGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#818cf8;stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Area fill -->
+                                <path d="M 0 200 L 100 195 L 200 185 L 300 175 L 400 165 L 500 150 L 600 135 L 700 120 L 700 250 L 0 250 Z" 
+                                      fill="url(#eduGradient)"/>
+                                
+                                <!-- Line -->
+                                <path d="M 0 200 L 100 195 L 200 185 L 300 175 L 400 165 L 500 150 L 600 135 L 700 120" 
+                                      stroke="#818cf8" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Interventions - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Interventions</h3>
+                        <div class="space-y-4">
+                            <div class="text-xs text-gray-400 grid grid-cols-3 gap-2 pb-2 border-b border-gray-700">
+                                <span>Type</span>
+                                <span class="text-right">Count</span>
+                                <span class="text-right">Status</span>
+                            </div>
+                            
+                            <!-- Remedial classes -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Remedial classes</div>
+                                <div class="text-right text-gray-300">1,280</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                        Live
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Device distribution -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Device distribution</div>
+                                <div class="text-right text-gray-300">8,420</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-900 text-orange-300 border border-orange-700">
+                                        Rolling
+                                    </span>
+                                </div>
+        </div>
+        
+                            <!-- Transport pass -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Transport pass</div>
+                                <div class="text-right text-gray-300">3,190</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                        Live
+                                    </span>
+                                </div>
+                            </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transport Tab -->
+            <div id="transport-tab" class="dept-tab-content hidden">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Permits issued (mo) -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Permits issued (mo)</div>
+                        <div class="text-3xl font-bold mb-1">18,920</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+7.2%
+                        </div>
+                    </div>
+                    
+                    <!-- Enforcement events -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Enforcement events</div>
+                        <div class="text-3xl font-bold mb-1">12,104</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+3.1%
+                        </div>
+                    </div>
+                    
+                    <!-- Fraud risk score -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Fraud risk score</div>
+                        <div class="text-3xl font-bold mb-1">0.34</div>
+                        <div class="text-xs text-yellow-400">
+                            watch
+                        </div>
+                    </div>
+                    
+                    <!-- Avg. turnaround -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Avg. turnaround</div>
+                        <div class="text-3xl font-bold mb-1">6.1h</div>
+                        <div class="text-xs text-red-400">
+                            <i class="fas fa-arrow-down mr-1"></i>-0.6h
+                    </div>
+                </div>
+            </div>
+            
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Compliance & Risk Signals - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Compliance & Risk Signals</h3>
+                        <div class="flex items-end justify-around h-64 px-4">
+                            <!-- Docs -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%; height: 100%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg mb-2" style="height: 60%; min-height: 20px;"></div>
+                                <div class="text-xs text-gray-400">Docs</div>
+                            </div>
+                            
+                            <!-- Permits -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%; height: 100%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg mb-2" style="height: 85%; min-height: 20px;"></div>
+                                <div class="text-xs text-gray-400">Permits</div>
+                            </div>
+                            
+                            <!-- Enforce -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%; height: 100%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg mb-2" style="height: 70%; min-height: 20px;"></div>
+                                <div class="text-xs text-gray-400">Enforce</div>
+                            </div>
+                            
+                            <!-- Fraud -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%; height: 100%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg mb-2" style="height: 40%; min-height: 20px;"></div>
+                                <div class="text-xs text-gray-400">Fraud</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Offences - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Recent Offences</h3>
+                        <div class="space-y-4">
+                            <div class="text-xs text-gray-400 grid grid-cols-3 gap-2 pb-2 border-b border-gray-700">
+                                <span>Type</span>
+                                <span class="text-right">Count</span>
+                                <span class="text-right">Severity</span>
+                            </div>
+                            
+                            <!-- No-permit ops -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">No-permit ops</div>
+                                <div class="text-right text-gray-300">212</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                        High
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Overloading -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Overloading</div>
+                                <div class="text-right text-gray-300">398</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                        Med
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Fake docs -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Fake docs</div>
+                                <div class="text-right text-gray-300">61</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                        High
+                                    </span>
+                                </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            <!-- Revenue Tab -->
+            <div id="revenue-tab" class="dept-tab-content hidden">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Beneficiaries -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Beneficiaries</div>
+                        <div class="text-3xl font-bold mb-1">48.6L</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+1.2%
+                        </div>
+                    </div>
+                    
+                    <!-- De-dupe rate -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">De-dupe rate</div>
+                        <div class="text-3xl font-bold mb-1">97.1%</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+0.6%
+                        </div>
+                    </div>
+                    
+                    <!-- Leakage detected -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Leakage detected</div>
+                        <div class="text-3xl font-bold mb-1">₹3.2 Cr</div>
+                        <div class="text-xs text-green-400">
+                            Recovered
+            </div>
+        </div>
+        
+                    <!-- Audit readiness -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Audit readiness</div>
+                        <div class="text-3xl font-bold mb-1">100%</div>
+                        <div class="text-xs text-green-400">
+                            meets
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Targeting & Delivery KPIs - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Targeting & Delivery KPIs</h3>
+                        <div class="relative h-64 flex items-end justify-around px-8 pb-4">
+                            <!-- Targeted -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t" style="height: 200px;"></div>
+                                <div class="text-sm text-gray-300 mt-3 font-medium">Targeted</div>
+                            </div>
+                            
+                            <!-- Delivered -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t" style="height: 190px;"></div>
+                                <div class="text-sm text-gray-300 mt-3 font-medium">Delivered</div>
+                            </div>
+                            
+                            <!-- Leakage -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t" style="height: 80px;"></div>
+                                <div class="text-sm text-gray-300 mt-3 font-medium">Leakage</div>
+                </div>
+                            
+                            <!-- Griev. -->
+                            <div class="flex flex-col items-center justify-end" style="width: 20%;">
+                                <div class="w-full bg-gradient-to-t from-blue-400 to-blue-500 rounded-t" style="height: 60px;"></div>
+                                <div class="text-sm text-gray-300 mt-3 font-medium">Griev.</div>
+                    </div>
+                </div>
+            </div>
+            
+                    <!-- Exception Cases - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Exception Cases</h3>
+                        <div class="space-y-4">
+                            <div class="text-xs text-gray-400 grid grid-cols-3 gap-2 pb-2 border-b border-gray-700">
+                                <span>Scheme</span>
+                                <span>Flag</span>
+                                <span class="text-right">Status</span>
+                            </div>
+                            
+                            <!-- Old Age Pension -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Old Age Pension</div>
+                                <div class="text-xs text-gray-400">Duplicate IDs</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                        Action
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Scholarship -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Scholarship</div>
+                                <div class="text-xs text-gray-400">Bank mismatch</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                        Review
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- DBT Housing -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">DBT Housing</div>
+                                <div class="text-xs text-gray-400">Geo-mismatch</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                        Closed
+                                    </span>
+                                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <!-- Disaster Management Tab -->
+            <div id="disaster-tab" class="dept-tab-content hidden">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Active incidents -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Active incidents</div>
+                        <div class="text-3xl font-bold mb-1">8</div>
+                        <div class="text-xs text-gray-300">
+                            monitor
+                        </div>
+                    </div>
+                    
+                    <!-- Avg. response -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Avg. response</div>
+                        <div class="text-3xl font-bold mb-1">14m</div>
+                        <div class="text-xs text-red-400">
+                            <i class="fas fa-arrow-down mr-1"></i>-2m
+                        </div>
+                    </div>
+                    
+                    <!-- Resources deployed -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Resources deployed</div>
+                        <div class="text-3xl font-bold mb-1">312</div>
+                        <div class="text-xs text-green-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+18
+                        </div>
+                    </div>
+                    
+                    <!-- Warnings issued -->
+                    <div class="bg-gradient-to-br from-blue-900 to-blue-800 text-white p-4 rounded-lg shadow">
+                        <div class="text-xs font-medium opacity-75 mb-1">Warnings issued</div>
+                        <div class="text-3xl font-bold mb-1">23</div>
+                        <div class="text-xs text-yellow-400">
+                            stable
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts and Tables Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Incident Timeline - Takes 2 columns -->
+                    <div class="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Incident Timeline</h3>
+                        <div class="relative h-64">
+                            <!-- Line chart with area fill -->
+                            <svg class="w-full h-full" viewBox="0 0 700 250" preserveAspectRatio="none">
+                                <!-- Grid lines -->
+                                <line x1="0" y1="50" x2="700" y2="50" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="100" x2="700" y2="100" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="150" x2="700" y2="150" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                <line x1="0" y1="200" x2="700" y2="200" stroke="#374151" stroke-width="1" opacity="0.3"/>
+                                
+                                <!-- Area chart gradient -->
+                                <defs>
+                                    <linearGradient id="disasterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#818cf8;stop-opacity:0.4" />
+                                        <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Area fill -->
+                                <path d="M 0 220 L 100 210 L 200 190 L 300 185 L 400 145 L 500 155 L 600 165 L 700 180 L 700 250 L 0 250 Z" 
+                                      fill="url(#disasterGradient)"/>
+                                
+                                <!-- Line -->
+                                <path d="M 0 220 L 100 210 L 200 190 L 300 185 L 400 145 L 500 155 L 600 165 L 700 180" 
+                                      stroke="#818cf8" stroke-width="2" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Resource Allocation - Takes 1 column -->
+                    <div class="lg:col-span-1 bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-lg shadow">
+                        <h3 class="text-base font-semibold mb-4">Resource Allocation</h3>
+                        <div class="space-y-4">
+                            <div class="text-xs text-gray-400 grid grid-cols-3 gap-2 pb-2 border-b border-gray-700">
+                                <span>District</span>
+                                <span class="text-right">Teams</span>
+                                <span class="text-right">Status</span>
+                            </div>
+                            
+                            <!-- Yamunanagar -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Yamunanagar</div>
+                                <div class="text-right text-gray-300">12</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-900 text-green-300 border border-green-700">
+                                        Deployed
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Karnal -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Karnal</div>
+                                <div class="text-right text-gray-300">7</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900 text-yellow-300 border border-yellow-700">
+                                        Mobilizing
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Sirsa -->
+                            <div class="grid grid-cols-3 gap-2 items-center text-sm">
+                                <div class="font-medium">Sirsa</div>
+                                <div class="text-right text-gray-300">5</div>
+                                <div class="text-right">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-900 text-red-300 border border-red-700">
+                                        Shortage
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+        </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+// Department Tab Switching
+function switchDepartmentTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.dept-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.remove('border-transparent', 'text-gray-500');
+            btn.classList.add('border-blue-500', 'text-blue-600');
+        } else {
+            btn.classList.remove('border-blue-500', 'text-blue-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.dept-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+}
+
 // Load dashboard metrics
 function loadDashboardMetrics() {
     const token = localStorage.getItem('token');
@@ -156,14 +974,9 @@ function refreshGhostLayerStats() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardMetrics();
-    loadGhostLayerStats();
-    
-    // Refresh data every 30 seconds
-    setInterval(() => {
-        loadDashboardMetrics();
-        loadGhostLayerStats();
-    }, 30000);
+    // Cards moved to respective pages, no data loading needed here
+    // loadDashboardMetrics();
+    // loadGhostLayerStats();
 });
 </script>
 {% endblock %}

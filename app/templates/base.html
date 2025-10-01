@@ -108,6 +108,28 @@
             from { width: 100%; }
             to { width: 0%; }
         }
+        
+        /* Sidebar collapse styles */
+        #sidebar.collapsed {
+            width: 5rem; /* 80px */
+        }
+        
+        #sidebar.collapsed .sidebar-text {
+            opacity: 0;
+            display: none;
+        }
+        
+        #sidebar.collapsed .menu-text {
+            display: none;
+        }
+        
+        #sidebar.collapsed .upload-menu-arrow {
+            display: none;
+        }
+        
+        #sidebar.collapsed #upload-submenu {
+            display: none !important;
+        }
     </style>
     
     <!-- Font Awesome for icons -->
@@ -119,17 +141,22 @@
     <!-- Sidebar -->
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div id="sidebar" class="w-64 bg-gray-900 text-white shadow-lg transition-transform duration-300 ease-in-out flex-shrink-0 flex flex-col">
+        <div id="sidebar" class="w-64 bg-gray-900 text-white shadow-lg transition-all duration-300 ease-in-out flex-shrink-0 flex flex-col">
             <!-- Logo Section -->
             <div class="p-6 border-b border-gray-700 flex-shrink-0">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3 overflow-hidden">
                     <div class="flex-shrink-0">
                         <img src="{{ url_for('static', path='images/cybercorp_logo.png') }}" alt="CyberCorp Logo" class="h-16 w-16 object-contain">
                     </div>
-                    <div>
+                        <div class="sidebar-text transition-opacity duration-300">
                         <h1 class="text-xl font-bold">IDMS</h1>
                         <p class="text-xs text-gray-400 mt-1">Intelligent Document Management System</p>
                     </div>
+                    </div>
+                    <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white transition-colors flex-shrink-0 ml-2" title="Toggle Sidebar">
+                        <i id="sidebar-toggle-icon" class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
             </div>
 
@@ -137,37 +164,29 @@
             <nav class="mt-6 flex-1 overflow-y-auto">
                 <div class="px-3">
                     <a href="/dashboard" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/dashboard' %}bg-gray-800 text-white{% endif %}">
-                        <i class="fas fa-home mr-3"></i>
-                        <span>Dashboard</span>
+                        <i class="fas fa-home mr-3 flex-shrink-0 text-base"></i>
+                        <span class="menu-text text-sm">Dashboard</span>
                     </a>
                     
-                    <!-- User Management - Admin Only -->
-                    <div id="user-management-menu" class="hidden">
-                        <a href="/admin-console" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/admin-console' %}bg-gray-800 text-white{% endif %}">
-                            <i class="fas fa-users mr-3"></i>
-                            <span>User Management</span>
-                        </a>
-                    </div>
-                    
-                    <!-- Upload Documents Menu with Sub-menus -->
+                    <!-- Document Classification Menu with Sub-menus -->
                     <div class="mb-2">
                         <button onclick="toggleUploadMenu()" class="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/upload' or request.url.path == '/auto-ingestion' %}bg-gray-800 text-white{% endif %}">
                             <div class="flex items-center">
-                                <i class="fas fa-upload mr-3"></i>
-                                <span>Upload Documents</span>
+                                <i class="fas fa-file-alt mr-2 flex-shrink-0 text-base"></i>
+                                <span class="menu-text text-sm">Document Classification</span>
                             </div>
-                            <i id="upload-menu-arrow" class="fas fa-chevron-down transition-transform duration-200"></i>
+                            <i id="upload-menu-arrow" class="fas fa-chevron-down transition-transform duration-200 upload-menu-arrow text-xs"></i>
                         </button>
                         <div id="upload-submenu" class="ml-4 mt-1 space-y-1 hidden">
                             <a href="/upload#ai-classification" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
-                                <i class="fas fa-brain mr-2"></i>
-                                <span>AI Document Classification</span>
+                                <i class="fas fa-hand-pointer mr-2 flex-shrink-0 text-xs"></i>
+                                <span class="menu-text text-xs">Manual Ingestion</span>
                             </a>
-                            <!-- Auto Ingestion Workflow - Admin Only -->
+                            <!-- Auto Ingestion - Admin Only -->
                             {% if user and user.role == 'admin' %}
                             <a href="/auto-ingestion" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200 {% if request.url.path == '/auto-ingestion' %}bg-gray-700 text-white{% endif %}">
-                                <i class="fas fa-robot mr-2"></i>
-                                <span>Auto Ingestion Workflow</span>
+                                <i class="fas fa-robot mr-2 flex-shrink-0 text-xs"></i>
+                                <span class="menu-text text-xs">Auto Ingestion</span>
                             </a>
                             {% endif %}
                             <!-- Business Documents submenu hidden -->
@@ -178,19 +197,31 @@
                         </div>
                     </div>
                     <a href="/ghostlayer-ai" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/ghostlayer-ai' %}bg-gray-800 text-white{% endif %}">
-                        <i class="fas fa-ghost mr-3"></i>
-                        <span>GhostLayer AI</span>
+                        <i class="fas fa-ghost mr-3 flex-shrink-0 text-base"></i>
+                        <span class="menu-text text-sm">GhostLayer AI</span>
                     </a>
                     <a href="/analytics" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/analytics' %}bg-gray-800 text-white{% endif %}">
-                        <i class="fas fa-chart-line mr-3"></i>
-                        <span>Analytics</span>
+                        <i class="fas fa-chart-line mr-3 flex-shrink-0 text-base"></i>
+                        <span class="menu-text text-sm">Analytics</span>
                     </a>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-gray-700 my-4"></div>
+
+                <!-- Management Section - Admin Only -->
+                <div id="management-section" class="hidden px-3">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 sidebar-text">Management</h3>
                     
-                    <!-- ACCE Console (Administration Console for Content Platform Engine) - Admin Only -->
-                    <div id="acce-console-menu" class="hidden">
-                        <a href="https://win-1gpq0nalnpb:9443/acce/login.jsp" target="_blank" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200" title="Administration Console for Content Platform Engine">
-                            <i class="fas fa-external-link-alt mr-3"></i>
-                            <span>ACCE Console</span>
+                    <div class="space-y-1">
+                        <a href="/admin-console" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/admin-console' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-users mr-2 flex-shrink-0 text-sm"></i>
+                            <span class="menu-text">User Management</span>
+                        </a>
+                        
+                        <a href="https://win-1gpq0nalnpb:9443/acce/login.jsp" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200" title="Administration Console for Content Platform Engine">
+                            <i class="fas fa-external-link-alt mr-2 flex-shrink-0 text-sm"></i>
+                            <span class="menu-text">ACCE Console</span>
                         </a>
                     </div>
                 </div>
@@ -200,7 +231,7 @@
 
 
                 <!-- System Status -->
-                <div class="px-3">
+                <div class="px-3 sidebar-text">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">System Status</h3>
                         <button onclick="updateSystemStatus()" class="text-gray-400 hover:text-gray-300 transition-colors" title="Refresh Status">
@@ -229,7 +260,7 @@
 
             <!-- Footer -->
             <div class="p-4 border-t border-gray-700 flex-shrink-0">
-                <div class="text-xs text-gray-400 text-center">
+                <div class="text-xs text-gray-400 text-center sidebar-text">
                     <p>&copy; 2025 CYBERCORP IDMS</p>
                     <p>Powered by IBM WatsonX AI</p>
                 </div>
@@ -541,6 +572,22 @@
         }
 
         // Toggle upload submenu
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            if (sidebar.classList.contains('collapsed')) {
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            } else {
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
+            }
+        }
+        
         function toggleUploadMenu() {
             const submenu = document.getElementById('upload-submenu');
             const arrow = document.getElementById('upload-menu-arrow');
@@ -633,15 +680,12 @@
                 updateUserAvatar(userData.full_name || userData.username);
                 
                 // Show/hide admin-only menus based on role
-                const userManagementMenu = document.getElementById('user-management-menu');
-                const acceConsoleMenu = document.getElementById('acce-console-menu');
+                const managementSection = document.getElementById('management-section');
                 
                 if (userData.role === 'admin') {
-                    if (userManagementMenu) userManagementMenu.classList.remove('hidden');
-                    if (acceConsoleMenu) acceConsoleMenu.classList.remove('hidden');
+                    if (managementSection) managementSection.classList.remove('hidden');
                 } else {
-                    if (userManagementMenu) userManagementMenu.classList.add('hidden');
-                    if (acceConsoleMenu) acceConsoleMenu.classList.add('hidden');
+                    if (managementSection) managementSection.classList.add('hidden');
                 }
                 
                 return true;
@@ -689,15 +733,12 @@
                     updateUserAvatar(userData.full_name || userData.username);
                     
                     // Show/hide admin-only menus based on role
-                    const userManagementMenu = document.getElementById('user-management-menu');
-                    const acceConsoleMenu = document.getElementById('acce-console-menu');
+                    const managementSection = document.getElementById('management-section');
                     
                     if (userData.role === 'admin') {
-                        if (userManagementMenu) userManagementMenu.classList.remove('hidden');
-                        if (acceConsoleMenu) acceConsoleMenu.classList.remove('hidden');
+                        if (managementSection) managementSection.classList.remove('hidden');
                     } else {
-                        if (userManagementMenu) userManagementMenu.classList.add('hidden');
-                        if (acceConsoleMenu) acceConsoleMenu.classList.add('hidden');
+                        if (managementSection) managementSection.classList.add('hidden');
                     }
                     
                     // Show/hide module access based on user permissions

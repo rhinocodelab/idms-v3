@@ -32,6 +32,42 @@
                 </div>
             </div>
 
+            <!-- AI Document Classification Statistics Card -->
+            <div class="bg-white shadow-sm border border-gray-200 p-3 mb-6">
+            <div class="flex items-center mb-2">
+                <div class="bg-blue-100 p-1.5 rounded-full">
+                    <i class="fas fa-chart-bar text-base text-blue-600"></i>
+                </div>
+                <div class="ml-2">
+                    <h3 class="text-sm font-bold text-gray-900">System Statistics</h3>
+                    <p class="text-xs text-gray-600">AI document processing summary</p>
+                </div>
+            </div>
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <!-- Total Documents -->
+                    <div class="text-center p-2 bg-blue-50 rounded">
+                        <i class="fas fa-file-alt text-lg text-blue-600 mb-0.5"></i>
+                        <p class="text-xs font-medium text-gray-600">Total Docs</p>
+                        <p class="text-lg font-bold text-blue-600" id="user-total-documents">--</p>
+                    </div>
+                    
+                    <!-- This Week -->
+                    <div class="text-center p-2 bg-purple-50 rounded">
+                        <i class="fas fa-calendar-week text-lg text-purple-600 mb-0.5"></i>
+                        <p class="text-xs font-medium text-gray-600">This Week</p>
+                        <p class="text-lg font-bold text-purple-600" id="user-this-week">--</p>
+                    </div>
+                    
+                    <!-- Storage Used -->
+                    <div class="text-center p-2 bg-orange-50 rounded">
+                        <i class="fas fa-hdd text-lg text-orange-600 mb-0.5"></i>
+                        <p class="text-xs font-medium text-gray-600">Storage</p>
+                        <p class="text-lg font-bold text-orange-600" id="user-storage-used">--</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- User Documents Table -->
             <div class="bg-white shadow-sm border border-gray-200 mb-6">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -725,9 +761,35 @@ async function uploadModalFiles() {
     }
 }
 
+// Load user statistics
+async function loadUserStats() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/dashboard-metrics', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('user-total-documents').textContent = data.total_ai_documents || 0;
+            document.getElementById('user-this-week').textContent = data.ai_docs_week || 0;
+            const aiStorageMB = ((data.ai_storage || 0) / 1024 / 1024).toFixed(2);
+            document.getElementById('user-storage-used').textContent = aiStorageMB + ' MB';
+        }
+    } catch (error) {
+        console.error('Error loading user stats:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Load user documents on page load
     loadUserDocuments();
+    
+    // Load user statistics
+    loadUserStats();
     
     // Setup modal functionality
     setupModalFileHandling();
