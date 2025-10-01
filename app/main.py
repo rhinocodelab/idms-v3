@@ -1162,6 +1162,22 @@ async def upload_page(request: Request):
         return RedirectResponse(url="/login")
     return templates.TemplateResponse("upload.html", {"request": request, "user": user})
 
+@app.get("/auto-ingestion", response_class=HTMLResponse)
+async def auto_ingestion_page(request: Request):
+    """Auto Ingestion Workflow page - Admin only"""
+    user = require_auth(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
+    
+    # Check if user is admin
+    if user.get('role') != 'admin':
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "error": "Access Denied: Admin privileges required for Auto Ingestion Workflow"
+        })
+    
+    return templates.TemplateResponse("auto_ingestion.html", {"request": request, "user": user})
+
 @app.post("/upload_files", response_class=HTMLResponse)
 async def upload_files_frontend(request: Request, files: List[UploadFile] = File(...)):
     """Handle file uploads from the frontend form"""
@@ -2888,3 +2904,246 @@ async def delete_user(user_id: int, request: Request):
     except Exception as e:
         logger.error(f"Delete user error: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete user")
+
+
+# ==================== AUTO INGESTION WORKFLOW ENDPOINTS ====================
+
+from pydantic import BaseModel
+import auto_ingestion
+
+class WorkflowCreate(BaseModel):
+    workflow_name: str
+    source_path: str
+    interval_seconds: int
+
+class WorkflowUpdate(BaseModel):
+    workflow_name: Optional[str] = None
+    source_path: Optional[str] = None
+    interval_seconds: Optional[int] = None
+
+@app.get("/api/auto-ingestion/dashboard")
+async def get_auto_ingestion_dashboard(request: Request):
+    """Get auto ingestion dashboard statistics (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        stats = db.get_auto_ingestion_dashboard_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting dashboard stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-ingestion/workflows")
+async def get_workflows(request: Request):
+    """Get all workflows (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        workflows = db.get_workflows()
+        return workflows
+    except Exception as e:
+        logger.error(f"Error getting workflows: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-ingestion/workflows")
+async def create_workflow(workflow: WorkflowCreate, request: Request):
+    """Create new workflow (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        # Validate interval
+        if workflow.interval_seconds < 10:
+            raise HTTPException(status_code=400, detail="Interval must be at least 10 seconds")
+        
+        # Validate source path exists
+        if not os.path.exists(workflow.source_path):
+            raise HTTPException(status_code=400, detail=f"Source path does not exist: {workflow.source_path}")
+        
+        # Create workflow
+        workflow_data = {
+            'workflow_name': workflow.workflow_name,
+            'source_path': workflow.source_path,
+            'user_id': user['id'],
+            'created_by': user['username'],
+            'interval_seconds': workflow.interval_seconds
+        }
+        
+        workflow_id = db.create_workflow(workflow_data)
+        
+        return {"id": workflow_id, "message": "Workflow created successfully"}
+    
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error creating workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-ingestion/workflows/{workflow_id}")
+async def get_workflow(workflow_id: int, request: Request):
+    """Get workflow by ID (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        workflow = db.get_workflow_by_id(workflow_id)
+        if not workflow:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        return workflow
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/auto-ingestion/workflows/{workflow_id}")
+async def update_workflow(workflow_id: int, workflow: WorkflowUpdate, request: Request):
+    """Update workflow (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        # Check if workflow exists
+        existing = db.get_workflow_by_id(workflow_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        
+        # Check if workflow is running
+        if auto_ingestion.is_workflow_running(workflow_id):
+            raise HTTPException(status_code=400, detail="Cannot update running workflow. Please stop it first.")
+        
+        # Validate interval if provided
+        if workflow.interval_seconds is not None and workflow.interval_seconds < 10:
+            raise HTTPException(status_code=400, detail="Interval must be at least 10 seconds")
+        
+        # Validate source path if provided
+        if workflow.source_path and not os.path.exists(workflow.source_path):
+            raise HTTPException(status_code=400, detail=f"Source path does not exist: {workflow.source_path}")
+        
+        # Build update data
+        update_data = {}
+        if workflow.workflow_name:
+            update_data['workflow_name'] = workflow.workflow_name
+        if workflow.source_path:
+            update_data['source_path'] = workflow.source_path
+        if workflow.interval_seconds:
+            update_data['interval_seconds'] = workflow.interval_seconds
+        
+        success = db.update_workflow(workflow_id, update_data)
+        
+        if success:
+            return {"message": "Workflow updated successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to update workflow")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/auto-ingestion/workflows/{workflow_id}")
+async def delete_workflow(workflow_id: int, request: Request):
+    """Delete workflow (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        # Check if workflow is running
+        if auto_ingestion.is_workflow_running(workflow_id):
+            raise HTTPException(status_code=400, detail="Cannot delete running workflow. Please stop it first.")
+        
+        success = db.delete_workflow(workflow_id)
+        
+        if success:
+            return {"message": "Workflow deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting workflow: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-ingestion/workflows/{workflow_id}/start")
+async def start_workflow_endpoint(workflow_id: int, request: Request):
+    """Start workflow (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        auto_ingestion.start_workflow(workflow_id)
+        return {"message": "Workflow started successfully"}
+    except Exception as e:
+        logger.error(f"Error starting workflow: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/auto-ingestion/workflows/{workflow_id}/stop")
+async def stop_workflow_endpoint(workflow_id: int, request: Request):
+    """Stop workflow (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        await auto_ingestion.stop_workflow(workflow_id)
+        return {"message": "Workflow stopped successfully"}
+    except Exception as e:
+        logger.error(f"Error stopping workflow: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/auto-ingestion/queue")
+async def get_queue(workflow_id: Optional[int] = None, request: Request = None):
+    """Get queue items (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        queue_items = db.get_queue_items(workflow_id=workflow_id)
+        return queue_items
+    except Exception as e:
+        logger.error(f"Error getting queue: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-ingestion/queue/{queue_id}/retry")
+async def retry_queue_item(queue_id: int, request: Request):
+    """Retry failed queue item (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        success = db.increment_retry_count(queue_id)
+        
+        if success:
+            return {"message": "Queue item queued for retry"}
+        else:
+            raise HTTPException(status_code=400, detail="Failed to retry queue item")
+    except Exception as e:
+        logger.error(f"Error retrying queue item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-ingestion/workflows/{workflow_id}/logs")
+async def get_workflow_logs(workflow_id: int, request: Request):
+    """Get workflow logs (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        logs = db.get_workflow_logs(workflow_id)
+        return logs
+    except Exception as e:
+        logger.error(f"Error getting logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -151,7 +151,7 @@
                     
                     <!-- Upload Documents Menu with Sub-menus -->
                     <div class="mb-2">
-                        <button onclick="toggleUploadMenu()" class="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/upload' %}bg-gray-800 text-white{% endif %}">
+                        <button onclick="toggleUploadMenu()" class="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/upload' or request.url.path == '/auto-ingestion' %}bg-gray-800 text-white{% endif %}">
                             <div class="flex items-center">
                                 <i class="fas fa-upload mr-3"></i>
                                 <span>Upload Documents</span>
@@ -163,6 +163,13 @@
                                 <i class="fas fa-brain mr-2"></i>
                                 <span>AI Document Classification</span>
                             </a>
+                            <!-- Auto Ingestion Workflow - Admin Only -->
+                            {% if user and user.role == 'admin' %}
+                            <a href="/auto-ingestion" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200 {% if request.url.path == '/auto-ingestion' %}bg-gray-700 text-white{% endif %}">
+                                <i class="fas fa-robot mr-2"></i>
+                                <span>Auto Ingestion Workflow</span>
+                            </a>
+                            {% endif %}
                             <!-- Business Documents submenu hidden -->
                             <!-- <a href="/upload#business-upload" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
                                 <i class="fas fa-briefcase mr-2"></i>

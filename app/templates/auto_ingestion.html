@@ -1,0 +1,849 @@
+{% extends "base.html" %}
+
+{% block title %}Auto Ingestion Workflow - IDMS{% endblock %}
+
+{% block page_title %}Auto Ingestion Workflow{% endblock %}
+{% block page_subtitle %}Automated document processing from monitored folders{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <!-- Dashboard Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <i class="fas fa-robot text-xl text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Active Workflows</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="active-workflows">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-green-100 p-3 rounded-full">
+                    <i class="fas fa-check-circle text-xl text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Processed Today</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="processed-today">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-yellow-100 p-3 rounded-full">
+                    <i class="fas fa-clock text-xl text-yellow-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">In Queue</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="queue-count">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="bg-red-100 p-3 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-xl text-red-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Failed</p>
+                    <p class="text-2xl font-semibold text-gray-900" id="failed-count">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header with Create Button -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-xl font-semibold text-gray-900">Workflows</h2>
+            <p class="text-sm text-gray-600 mt-1">Manage automated document ingestion workflows</p>
+        </div>
+        <button onclick="showCreateWorkflowModal()" class="bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition-colors">
+            <i class="fas fa-plus mr-2"></i>Create Workflow
+        </button>
+    </div>
+
+    <!-- Workflows List -->
+    <div id="workflows-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Workflow cards will be loaded here dynamically -->
+        <div class="col-span-full text-center py-12 text-gray-500">
+            <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+            <p>Loading workflows...</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Create/Edit Workflow Modal -->
+<div id="workflowModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-2xl w-full">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-cog mr-2 text-blue-600"></i>
+                    <span id="modalTitle">Create New Workflow</span>
+                </h3>
+                <button onclick="hideWorkflowModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form id="workflowForm" class="space-y-4">
+                    <input type="hidden" id="workflowId" value="">
+                    
+                    <!-- Workflow Name -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Workflow Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="workflowName" required
+                               class="w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., Invoice Auto Processing">
+                    </div>
+                    
+                    <!-- Source Path -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Source Folder Path <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex">
+                            <input type="text" id="sourcePath" required
+                                   class="flex-1 px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="e.g., C:\Documents\Invoices">
+                            <button type="button" onclick="browseFolder()" 
+                                    class="ml-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-folder-open mr-1"></i>Browse
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle"></i> Enter the full path to the folder to monitor
+                        </p>
+                    </div>
+                    
+                    <!-- Scan Interval -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Scan Interval (seconds) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" id="intervalSeconds" required min="10" value="60"
+                               class="w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle"></i> Minimum: 10 seconds. Files will be scanned at this interval.
+                        </p>
+                    </div>
+                    
+                    <!-- File Pattern Info (Read-only) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Allowed File Types
+                        </label>
+                        <div class="px-3 py-2 bg-gray-50 border border-gray-300 text-gray-600">
+                            <i class="fas fa-image mr-2 text-blue-600"></i>
+                            <span class="font-medium">PNG, JPEG, JPG</span> (Image files only)
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                        <button type="button" onclick="hideWorkflowModal()" 
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submitWorkflowBtn"
+                                class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Create Workflow
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Details Modal -->
+<div id="workflowDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-6xl w-full my-8">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    <span id="detailsWorkflowName">Workflow Details</span>
+                </h3>
+                <button onclick="hideWorkflowDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <!-- Workflow Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Status</p>
+                        <p class="font-semibold text-lg" id="detailsStatus">
+                            <span class="px-3 py-1 rounded-full text-sm"></span>
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Source Path</p>
+                        <p class="font-semibold text-sm break-all" id="detailsSourcePath">-</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Scan Interval</p>
+                        <p class="font-semibold" id="detailsInterval">-</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Last Scan</p>
+                        <p class="font-semibold text-sm" id="detailsLastScan">-</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Files Processed</p>
+                        <p class="font-semibold text-lg text-green-600" id="detailsProcessed">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 border border-gray-200">
+                        <p class="text-sm text-gray-600 mb-1">Files Failed</p>
+                        <p class="font-semibold text-lg text-red-600" id="detailsFailed">0</p>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 mb-4">
+                    <nav class="-mb-px flex space-x-8">
+                        <button onclick="switchDetailsTab('queue')" 
+                                class="details-tab-btn py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+                                data-tab="queue">
+                            <i class="fas fa-list mr-2"></i>Queue
+                        </button>
+                        <button onclick="switchDetailsTab('logs')" 
+                                class="details-tab-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                data-tab="logs">
+                            <i class="fas fa-history mr-2"></i>Activity Logs
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Queue Tab -->
+                <div id="queueTab" class="details-tab-content">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">File Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueTableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Loading queue...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Logs Tab -->
+                <div id="logsTab" class="details-tab-content hidden">
+                    <div id="logsContainer" class="space-y-2 max-h-96 overflow-y-auto">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Loading logs...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentWorkflowId = null;
+
+// Load dashboard statistics
+async function loadDashboardStats() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/auto-ingestion/dashboard', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('active-workflows').textContent = stats.active_workflows || 0;
+            document.getElementById('processed-today').textContent = stats.processed_today || 0;
+            document.getElementById('queue-count').textContent = stats.queue_count || 0;
+            document.getElementById('failed-count').textContent = stats.failed_count || 0;
+        }
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+    }
+}
+
+// Load workflows list
+async function loadWorkflows() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/auto-ingestion/workflows', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const workflows = await response.json();
+            displayWorkflows(workflows);
+        } else {
+            throw new Error('Failed to load workflows');
+        }
+    } catch (error) {
+        console.error('Error loading workflows:', error);
+        document.getElementById('workflows-container').innerHTML = `
+            <div class="col-span-full text-center py-12 text-red-500">
+                <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                <p>Error loading workflows</p>
+            </div>
+        `;
+    }
+}
+
+// Display workflows as cards
+function displayWorkflows(workflows) {
+    const container = document.getElementById('workflows-container');
+    
+    if (workflows.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-inbox text-5xl mb-4"></i>
+                <p class="text-lg mb-2">No workflows created yet</p>
+                <p class="text-sm">Click "Create Workflow" to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = workflows.map(workflow => {
+        const statusColors = {
+            'running': 'bg-green-100 text-green-800',
+            'stopped': 'bg-gray-100 text-gray-800',
+            'paused': 'bg-yellow-100 text-yellow-800',
+            'error': 'bg-red-100 text-red-800'
+        };
+        
+        const statusIcons = {
+            'running': 'fa-play-circle',
+            'stopped': 'fa-stop-circle',
+            'paused': 'fa-pause-circle',
+            'error': 'fa-exclamation-circle'
+        };
+        
+        const statusColor = statusColors[workflow.status] || 'bg-gray-100 text-gray-800';
+        const statusIcon = statusIcons[workflow.status] || 'fa-circle';
+        
+        return `
+            <div class="bg-white shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">${workflow.workflow_name}</h3>
+                        <p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-folder mr-1"></i>${workflow.source_path}
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">
+                        <i class="fas ${statusIcon} mr-1"></i>${workflow.status.toUpperCase()}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div>
+                        <p class="text-gray-600">Interval</p>
+                        <p class="font-semibold">${workflow.interval_seconds}s</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Processed</p>
+                        <p class="font-semibold text-green-600">${workflow.total_files_processed || 0}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Failed</p>
+                        <p class="font-semibold text-red-600">${workflow.total_files_failed || 0}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Last Scan</p>
+                        <p class="font-semibold text-xs">${workflow.last_scan_timestamp ? new Date(workflow.last_scan_timestamp).toLocaleString() : 'Never'}</p>
+                    </div>
+                </div>
+                
+                ${workflow.error_message ? `
+                    <div class="bg-red-50 border border-red-200 p-2 mb-4 text-xs text-red-700">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>${workflow.error_message}
+                    </div>
+                ` : ''}
+                
+                <div class="flex space-x-2">
+                    ${workflow.status === 'running' ? `
+                        <button onclick="stopWorkflow(${workflow.id})" 
+                                class="flex-1 px-3 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors text-sm">
+                            <i class="fas fa-stop mr-1"></i>Stop
+                        </button>
+                    ` : `
+                        <button onclick="startWorkflow(${workflow.id})" 
+                                class="flex-1 px-3 py-2 bg-green-600 text-white hover:bg-green-700 transition-colors text-sm">
+                            <i class="fas fa-play mr-1"></i>Start
+                        </button>
+                    `}
+                    <button onclick="showWorkflowDetails(${workflow.id})" 
+                            class="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button onclick="editWorkflow(${workflow.id})" 
+                            class="px-3 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors text-sm">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteWorkflow(${workflow.id})" 
+                            class="px-3 py-2 bg-gray-400 text-white hover:bg-gray-500 transition-colors text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Modal functions
+function showCreateWorkflowModal() {
+    document.getElementById('modalTitle').textContent = 'Create New Workflow';
+    document.getElementById('workflowForm').reset();
+    document.getElementById('workflowId').value = '';
+    document.getElementById('submitWorkflowBtn').innerHTML = '<i class="fas fa-save mr-2"></i>Create Workflow';
+    document.getElementById('workflowModal').classList.remove('hidden');
+}
+
+function hideWorkflowModal() {
+    document.getElementById('workflowModal').classList.add('hidden');
+}
+
+function browseFolder() {
+    alert('Note: For security reasons, web browsers cannot directly browse local folders.\nPlease manually enter the full folder path (e.g., C:\\Documents\\Invoices)');
+}
+
+// Create/Update workflow
+document.getElementById('workflowForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const workflowId = document.getElementById('workflowId').value;
+    const workflowData = {
+        workflow_name: document.getElementById('workflowName').value,
+        source_path: document.getElementById('sourcePath').value,
+        interval_seconds: parseInt(document.getElementById('intervalSeconds').value)
+    };
+    
+    try {
+        const token = localStorage.getItem('token');
+        const url = workflowId ? `/api/auto-ingestion/workflows/${workflowId}` : '/api/auto-ingestion/workflows';
+        const method = workflowId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(workflowData)
+        });
+        
+        if (response.ok) {
+            hideWorkflowModal();
+            loadWorkflows();
+            loadDashboardStats();
+            showNotification('success', workflowId ? 'Workflow updated successfully' : 'Workflow created successfully');
+        } else {
+            const error = await response.json();
+            showNotification('error', error.detail || 'Failed to save workflow');
+        }
+    } catch (error) {
+        console.error('Error saving workflow:', error);
+        showNotification('error', 'Error saving workflow');
+    }
+});
+
+// Start workflow
+async function startWorkflow(workflowId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}/start`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            loadWorkflows();
+            loadDashboardStats();
+            showNotification('success', 'Workflow started');
+        } else {
+            const error = await response.json();
+            showNotification('error', error.detail || 'Failed to start workflow');
+        }
+    } catch (error) {
+        console.error('Error starting workflow:', error);
+        showNotification('error', 'Error starting workflow');
+    }
+}
+
+// Stop workflow
+async function stopWorkflow(workflowId) {
+    if (!confirm('Are you sure you want to stop this workflow?')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}/stop`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            loadWorkflows();
+            loadDashboardStats();
+            showNotification('success', 'Workflow stopped');
+        } else {
+            const error = await response.json();
+            showNotification('error', error.detail || 'Failed to stop workflow');
+        }
+    } catch (error) {
+        console.error('Error stopping workflow:', error);
+        showNotification('error', 'Error stopping workflow');
+    }
+}
+
+// Edit workflow
+async function editWorkflow(workflowId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const workflow = await response.json();
+            document.getElementById('modalTitle').textContent = 'Edit Workflow';
+            document.getElementById('workflowId').value = workflow.id;
+            document.getElementById('workflowName').value = workflow.workflow_name;
+            document.getElementById('sourcePath').value = workflow.source_path;
+            document.getElementById('intervalSeconds').value = workflow.interval_seconds;
+            document.getElementById('submitWorkflowBtn').innerHTML = '<i class="fas fa-save mr-2"></i>Update Workflow';
+            document.getElementById('workflowModal').classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading workflow:', error);
+        showNotification('error', 'Error loading workflow details');
+    }
+}
+
+// Delete workflow
+async function deleteWorkflow(workflowId) {
+    if (!confirm('Are you sure you want to delete this workflow? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            loadWorkflows();
+            loadDashboardStats();
+            showNotification('success', 'Workflow deleted');
+        } else {
+            const error = await response.json();
+            showNotification('error', error.detail || 'Failed to delete workflow');
+        }
+    } catch (error) {
+        console.error('Error deleting workflow:', error);
+        showNotification('error', 'Error deleting workflow');
+    }
+}
+
+// Show workflow details
+async function showWorkflowDetails(workflowId) {
+    currentWorkflowId = workflowId;
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const workflow = await response.json();
+            displayWorkflowDetails(workflow);
+            document.getElementById('workflowDetailsModal').classList.remove('hidden');
+            
+            // Load queue and logs
+            loadQueue(workflowId);
+            loadLogs(workflowId);
+        }
+    } catch (error) {
+        console.error('Error loading workflow details:', error);
+        showNotification('error', 'Error loading workflow details');
+    }
+}
+
+function displayWorkflowDetails(workflow) {
+    const statusColors = {
+        'running': 'bg-green-100 text-green-800',
+        'stopped': 'bg-gray-100 text-gray-800',
+        'paused': 'bg-yellow-100 text-yellow-800',
+        'error': 'bg-red-100 text-red-800'
+    };
+    
+    document.getElementById('detailsWorkflowName').textContent = workflow.workflow_name;
+    document.getElementById('detailsStatus').innerHTML = `
+        <span class="px-3 py-1 rounded-full text-sm ${statusColors[workflow.status]}">${workflow.status.toUpperCase()}</span>
+    `;
+    document.getElementById('detailsSourcePath').textContent = workflow.source_path;
+    document.getElementById('detailsInterval').textContent = `${workflow.interval_seconds} seconds`;
+    document.getElementById('detailsLastScan').textContent = workflow.last_scan_timestamp 
+        ? new Date(workflow.last_scan_timestamp).toLocaleString() 
+        : 'Never';
+    document.getElementById('detailsProcessed').textContent = workflow.total_files_processed || 0;
+    document.getElementById('detailsFailed').textContent = workflow.total_files_failed || 0;
+}
+
+function hideWorkflowDetailsModal() {
+    document.getElementById('workflowDetailsModal').classList.add('hidden');
+    currentWorkflowId = null;
+}
+
+// Switch tabs in details modal
+function switchDetailsTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.details-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.remove('border-transparent', 'text-gray-500');
+            btn.classList.add('border-blue-500', 'text-blue-600');
+        } else {
+            btn.classList.remove('border-blue-500', 'text-blue-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.details-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+}
+
+// Load queue
+async function loadQueue(workflowId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/queue?workflow_id=${workflowId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const queueItems = await response.json();
+            displayQueue(queueItems);
+        }
+    } catch (error) {
+        console.error('Error loading queue:', error);
+    }
+}
+
+function displayQueue(queueItems) {
+    const tbody = document.getElementById('queueTableBody');
+    
+    if (queueItems.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-gray-500">No files in queue</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const statusColors = {
+        'pending': 'bg-yellow-100 text-yellow-800',
+        'processing': 'bg-blue-100 text-blue-800',
+        'completed': 'bg-green-100 text-green-800',
+        'failed': 'bg-red-100 text-red-800'
+    };
+    
+    tbody.innerHTML = queueItems.map(item => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-sm text-gray-900">${item.file_name}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">${(item.file_size / 1024).toFixed(2)} KB</td>
+            <td class="px-4 py-3">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[item.status]}">
+                    ${item.status}
+                </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">${new Date(item.added_to_queue_at).toLocaleString()}</td>
+            <td class="px-4 py-3 text-sm">
+                ${item.status === 'failed' && item.retry_count < item.max_retries ? `
+                    <button onclick="retryQueueItem(${item.id})" 
+                            class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-redo mr-1"></i>Retry
+                    </button>
+                ` : '-'}
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Load logs
+async function loadLogs(workflowId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/workflows/${workflowId}/logs`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const logs = await response.json();
+            displayLogs(logs);
+        }
+    } catch (error) {
+        console.error('Error loading logs:', error);
+    }
+}
+
+function displayLogs(logs) {
+    const container = document.getElementById('logsContainer');
+    
+    if (logs.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-8">No activity logs yet</div>
+        `;
+        return;
+    }
+    
+    const logColors = {
+        'info': 'border-blue-200 bg-blue-50 text-blue-800',
+        'success': 'border-green-200 bg-green-50 text-green-800',
+        'warning': 'border-yellow-200 bg-yellow-50 text-yellow-800',
+        'error': 'border-red-200 bg-red-50 text-red-800'
+    };
+    
+    const logIcons = {
+        'info': 'fa-info-circle',
+        'success': 'fa-check-circle',
+        'warning': 'fa-exclamation-triangle',
+        'error': 'fa-times-circle'
+    };
+    
+    container.innerHTML = logs.map(log => `
+        <div class="border-l-4 p-3 ${logColors[log.log_level]}">
+            <div class="flex items-start">
+                <i class="fas ${logIcons[log.log_level]} mr-2 mt-1"></i>
+                <div class="flex-1">
+                    <p class="text-sm font-medium">${log.log_message}</p>
+                    ${log.file_path ? `<p class="text-xs mt-1 opacity-75">${log.file_path}</p>` : ''}
+                    <p class="text-xs mt-1 opacity-75">${new Date(log.timestamp).toLocaleString()}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Retry queue item
+async function retryQueueItem(queueItemId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/auto-ingestion/queue/${queueItemId}/retry`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            loadQueue(currentWorkflowId);
+            showNotification('success', 'File queued for retry');
+        }
+    } catch (error) {
+        console.error('Error retrying queue item:', error);
+        showNotification('error', 'Error retrying file');
+    }
+}
+
+// Notification function
+function showNotification(type, message) {
+    const colors = {
+        'success': 'bg-green-500',
+        'error': 'bg-red-500',
+        'info': 'bg-blue-500'
+    };
+    
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded shadow-lg z-50`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+    loadWorkflows();
+    
+    // Refresh data every 5 seconds
+    setInterval(() => {
+        loadDashboardStats();
+        loadWorkflows();
+        if (currentWorkflowId) {
+            loadQueue(currentWorkflowId);
+            loadLogs(currentWorkflowId);
+        }
+    }, 5000);
+});
+</script>
+{% endblock %}
+

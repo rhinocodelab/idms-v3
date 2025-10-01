@@ -57,6 +57,9 @@ def clean_database(db_path: str):
         
         # Delete from tables (in order to respect dependencies)
         tables_to_clean = [
+            ('auto_ingestion_logs', 'Auto Ingestion logs'),
+            ('auto_ingestion_queue', 'Auto Ingestion queue'),
+            ('auto_ingestion_workflows', 'Auto Ingestion workflows'),
             ('processing_logs', 'Processing logs'),
             ('filenet_uploads', 'FileNet uploads'),
             ('system_metrics', 'System metrics'),

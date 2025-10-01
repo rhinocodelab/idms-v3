@@ -43,6 +43,7 @@ class IDMSDatabase:
         self.create_ghostlayer_documents_table(cursor)
         self.create_ai_document_classifications_table(cursor)
         self.create_user_ghostlayer_documents_table(cursor)
+        self.create_auto_ingestion_tables(cursor)
         
         conn.commit()
         conn.close()
@@ -1776,6 +1777,104 @@ class IDMSDatabase:
             return False
         finally:
             conn.close()
+    
+    # ==================== AUTO INGESTION WORKFLOW TABLES ====================
+    
+    def create_auto_ingestion_tables(self, cursor):
+        """Create all auto ingestion workflow tables"""
+        self.create_auto_ingestion_workflows_table(cursor)
+        self.create_auto_ingestion_queue_table(cursor)
+        self.create_auto_ingestion_logs_table(cursor)
+    
+    def create_auto_ingestion_workflows_table(self, cursor):
+        """Create auto_ingestion_workflows table"""
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS auto_ingestion_workflows (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_name TEXT NOT NULL,
+                source_path TEXT UNIQUE NOT NULL,
+                user_id INTEGER NOT NULL,
+                created_by TEXT NOT NULL,
+                interval_seconds INTEGER NOT NULL,
+                status TEXT DEFAULT 'stopped',
+                last_scan_timestamp DATETIME,
+                total_files_processed INTEGER DEFAULT 0,
+                total_files_failed INTEGER DEFAULT 0,
+                next_scan_time DATETIME,
+                is_active BOOLEAN DEFAULT 1,
+                file_pattern TEXT DEFAULT '*.png,*.jpg,*.jpeg',
+                process_subdirectories BOOLEAN DEFAULT 0,
+                error_message TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+        """)
+        logger.info("Created auto_ingestion_workflows table")
+    
+    def create_auto_ingestion_queue_table(self, cursor):
+        """Create auto_ingestion_queue table"""
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS auto_ingestion_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id INTEGER NOT NULL,
+                file_path TEXT NOT NULL,
+                file_name TEXT NOT NULL,
+                file_size INTEGER,
+                file_checksum TEXT,
+                status TEXT DEFAULT 'pending',
+                priority INTEGER DEFAULT 0,
+                retry_count INTEGER DEFAULT 0,
+                max_retries INTEGER DEFAULT 3,
+                error_message TEXT,
+                processing_start_time DATETIME,
+                processing_end_time DATETIME,
+                document_id INTEGER,
+                added_to_queue_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workflow_id) REFERENCES auto_ingestion_workflows(id) ON DELETE CASCADE,
+                FOREIGN KEY (document_id) REFERENCES ai_document_classifications(id)
+            )
+        """)
+        
+        # Create indexes for better performance
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_queue_workflow_status 
+            ON auto_ingestion_queue(workflow_id, status)
+        """)
+        
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_queue_checksum 
+            ON auto_ingestion_queue(file_checksum)
+        """)
+        
+        logger.info("Created auto_ingestion_queue table with indexes")
+    
+    def create_auto_ingestion_logs_table(self, cursor):
+        """Create auto_ingestion_logs table"""
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS auto_ingestion_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                workflow_id INTEGER NOT NULL,
+                queue_item_id INTEGER,
+                log_level TEXT NOT NULL,
+                log_message TEXT NOT NULL,
+                file_path TEXT,
+                details TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (workflow_id) REFERENCES auto_ingestion_workflows(id) ON DELETE CASCADE,
+                FOREIGN KEY (queue_item_id) REFERENCES auto_ingestion_queue(id) ON DELETE SET NULL
+            )
+        """)
+        
+        # Create index for better performance
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_logs_workflow_timestamp 
+            ON auto_ingestion_logs(workflow_id, timestamp DESC)
+        """)
+        
+        logger.info("Created auto_ingestion_logs table with index")
 
     def get_user_dashboard_stats(self, user_id: int) -> Dict:
         """Get personalized dashboard statistics for a specific user"""
@@ -1943,6 +2042,474 @@ class IDMSDatabase:
             'document_types': combined_types,
             'recent_uploads': recent_uploads
         }
+
+    # ==================== AUTO INGESTION WORKFLOW OPERATIONS ====================
+    
+    # Workflow CRUD Operations
+    def create_workflow(self, workflow_data: Dict) -> int:
+        """Create a new auto ingestion workflow"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT INTO auto_ingestion_workflows (
+                    workflow_name, source_path, user_id, created_by, interval_seconds,
+                    file_pattern, process_subdirectories
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                workflow_data['workflow_name'],
+                workflow_data['source_path'],
+                workflow_data['user_id'],
+                workflow_data['created_by'],
+                workflow_data['interval_seconds'],
+                workflow_data.get('file_pattern', '*.png,*.jpg,*.jpeg'),
+                workflow_data.get('process_subdirectories', 0)
+            ))
+            
+            workflow_id = cursor.lastrowid
+            conn.commit()
+            logger.info(f"Workflow created with ID: {workflow_id}")
+            return workflow_id
+        except sqlite3.IntegrityError as e:
+            logger.error(f"Workflow creation failed - duplicate source path: {e}")
+            raise ValueError("Source path already exists in another workflow")
+        except Exception as e:
+            logger.error(f"Error creating workflow: {e}")
+            raise
+        finally:
+            conn.close()
+    
+    def get_workflows(self, user_id: int = None) -> List[Dict]:
+        """Get all workflows (optionally filtered by user)"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        try:
+            if user_id:
+                cursor.execute("""
+                    SELECT * FROM auto_ingestion_workflows 
+                    WHERE user_id = ? AND is_active = 1
+                    ORDER BY created_at DESC
+                """, (user_id,))
+            else:
+                cursor.execute("""
+                    SELECT * FROM auto_ingestion_workflows 
+                    WHERE is_active = 1
+                    ORDER BY created_at DESC
+                """)
+            
+            workflows = [dict(row) for row in cursor.fetchall()]
+            return workflows
+        finally:
+            conn.close()
+    
+    def get_workflow_by_id(self, workflow_id: int) -> Optional[Dict]:
+        """Get workflow by ID"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT * FROM auto_ingestion_workflows WHERE id = ?
+            """, (workflow_id,))
+            
+            row = cursor.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+    
+    def update_workflow(self, workflow_id: int, update_data: Dict) -> bool:
+        """Update workflow configuration"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            set_clauses = []
+            values = []
+            
+            allowed_fields = ['workflow_name', 'source_path', 'interval_seconds', 
+                            'file_pattern', 'process_subdirectories']
+            
+            for field in allowed_fields:
+                if field in update_data:
+                    set_clauses.append(f"{field} = ?")
+                    values.append(update_data[field])
+            
+            if not set_clauses:
+                return False
+            
+            set_clauses.append("updated_at = CURRENT_TIMESTAMP")
+            values.append(workflow_id)
+            
+            query = f"""
+                UPDATE auto_ingestion_workflows 
+                SET {', '.join(set_clauses)}
+                WHERE id = ?
+            """
+            
+            cursor.execute(query, values)
+            conn.commit()
+            success = cursor.rowcount > 0
+            
+            if success:
+                logger.info(f"Workflow {workflow_id} updated")
+            return success
+        except Exception as e:
+            logger.error(f"Error updating workflow {workflow_id}: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def update_workflow_status(self, workflow_id: int, status: str, error_message: str = None) -> bool:
+        """Update workflow status"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            if error_message:
+                cursor.execute("""
+                    UPDATE auto_ingestion_workflows 
+                    SET status = ?, error_message = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, error_message, workflow_id))
+            else:
+                cursor.execute("""
+                    UPDATE auto_ingestion_workflows 
+                    SET status = ?, error_message = NULL, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, workflow_id))
+            
+            conn.commit()
+            logger.info(f"Workflow {workflow_id} status updated to {status}")
+            return True
+        except Exception as e:
+            logger.error(f"Error updating workflow status: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def update_workflow_scan_time(self, workflow_id: int) -> bool:
+        """Update last scan timestamp"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE auto_ingestion_workflows 
+                SET last_scan_timestamp = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (workflow_id,))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error updating scan time: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def increment_workflow_stats(self, workflow_id: int, success: bool = True) -> bool:
+        """Increment processed or failed count"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            if success:
+                cursor.execute("""
+                    UPDATE auto_ingestion_workflows 
+                    SET total_files_processed = total_files_processed + 1,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (workflow_id,))
+            else:
+                cursor.execute("""
+                    UPDATE auto_ingestion_workflows 
+                    SET total_files_failed = total_files_failed + 1,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (workflow_id,))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error incrementing workflow stats: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def delete_workflow(self, workflow_id: int) -> bool:
+        """Soft delete workflow"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE auto_ingestion_workflows 
+                SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (workflow_id,))
+            
+            conn.commit()
+            success = cursor.rowcount > 0
+            
+            if success:
+                logger.info(f"Workflow {workflow_id} deleted (soft)")
+            return success
+        except Exception as e:
+            logger.error(f"Error deleting workflow: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    # Queue Operations
+    def add_to_queue(self, queue_data: Dict) -> int:
+        """Add file to processing queue"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT INTO auto_ingestion_queue (
+                    workflow_id, file_path, file_name, file_size, file_checksum, priority
+                ) VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                queue_data['workflow_id'],
+                queue_data['file_path'],
+                queue_data['file_name'],
+                queue_data.get('file_size', 0),
+                queue_data.get('file_checksum'),
+                queue_data.get('priority', 0)
+            ))
+            
+            queue_id = cursor.lastrowid
+            conn.commit()
+            logger.info(f"File added to queue with ID: {queue_id}")
+            return queue_id
+        except Exception as e:
+            logger.error(f"Error adding to queue: {e}")
+            raise
+        finally:
+            conn.close()
+    
+    def get_queue_items(self, workflow_id: int = None, status: str = None, limit: int = 100) -> List[Dict]:
+        """Get queue items"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        try:
+            query = "SELECT * FROM auto_ingestion_queue WHERE 1=1"
+            params = []
+            
+            if workflow_id:
+                query += " AND workflow_id = ?"
+                params.append(workflow_id)
+            
+            if status:
+                query += " AND status = ?"
+                params.append(status)
+            
+            query += " ORDER BY priority DESC, added_to_queue_at ASC LIMIT ?"
+            params.append(limit)
+            
+            cursor.execute(query, params)
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            conn.close()
+    
+    def get_next_pending_item(self, workflow_id: int = None) -> Optional[Dict]:
+        """Get next pending item from queue"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        try:
+            if workflow_id:
+                cursor.execute("""
+                    SELECT * FROM auto_ingestion_queue 
+                    WHERE workflow_id = ? AND status = 'pending' AND retry_count < max_retries
+                    ORDER BY priority DESC, added_to_queue_at ASC
+                    LIMIT 1
+                """, (workflow_id,))
+            else:
+                cursor.execute("""
+                    SELECT * FROM auto_ingestion_queue 
+                    WHERE status = 'pending' AND retry_count < max_retries
+                    ORDER BY priority DESC, added_to_queue_at ASC
+                    LIMIT 1
+                """)
+            
+            row = cursor.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+    
+    def update_queue_status(self, queue_id: int, status: str, error_message: str = None, 
+                           document_id: int = None) -> bool:
+        """Update queue item status"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            if status == 'processing':
+                cursor.execute("""
+                    UPDATE auto_ingestion_queue 
+                    SET status = ?, processing_start_time = CURRENT_TIMESTAMP, 
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, queue_id))
+            elif status in ['completed', 'failed']:
+                cursor.execute("""
+                    UPDATE auto_ingestion_queue 
+                    SET status = ?, processing_end_time = CURRENT_TIMESTAMP,
+                        error_message = ?, document_id = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, error_message, document_id, queue_id))
+            else:
+                cursor.execute("""
+                    UPDATE auto_ingestion_queue 
+                    SET status = ?, error_message = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, error_message, queue_id))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error updating queue status: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def increment_retry_count(self, queue_id: int) -> bool:
+        """Increment retry count for queue item"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE auto_ingestion_queue 
+                SET retry_count = retry_count + 1, status = 'pending', 
+                    error_message = NULL, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (queue_id,))
+            
+            conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Error incrementing retry count: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def check_file_exists_in_queue(self, workflow_id: int, file_checksum: str) -> bool:
+        """Check if file with same checksum already exists in queue or was processed"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT COUNT(*) FROM auto_ingestion_queue 
+                WHERE workflow_id = ? AND file_checksum = ?
+            """, (workflow_id, file_checksum))
+            
+            count = cursor.fetchone()[0]
+            return count > 0
+        finally:
+            conn.close()
+    
+    # Log Operations
+    def insert_workflow_log(self, log_data: Dict) -> int:
+        """Insert workflow activity log"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT INTO auto_ingestion_logs (
+                    workflow_id, queue_item_id, log_level, log_message, file_path, details
+                ) VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                log_data['workflow_id'],
+                log_data.get('queue_item_id'),
+                log_data['log_level'],
+                log_data['log_message'],
+                log_data.get('file_path'),
+                json.dumps(log_data.get('details', {})) if log_data.get('details') else None
+            ))
+            
+            log_id = cursor.lastrowid
+            conn.commit()
+            return log_id
+        except Exception as e:
+            logger.error(f"Error inserting workflow log: {e}")
+            return 0
+        finally:
+            conn.close()
+    
+    def get_workflow_logs(self, workflow_id: int, limit: int = 100) -> List[Dict]:
+        """Get workflow logs"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT * FROM auto_ingestion_logs 
+                WHERE workflow_id = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (workflow_id, limit))
+            
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            conn.close()
+    
+    # Dashboard Statistics
+    def get_auto_ingestion_dashboard_stats(self) -> Dict:
+        """Get auto ingestion dashboard statistics"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            # Active workflows
+            cursor.execute("""
+                SELECT COUNT(*) FROM auto_ingestion_workflows 
+                WHERE status = 'running' AND is_active = 1
+            """)
+            active_workflows = cursor.fetchone()[0]
+            
+            # Files processed today
+            cursor.execute("""
+                SELECT COUNT(*) FROM auto_ingestion_queue 
+                WHERE status = 'completed' AND DATE(processing_end_time) = DATE('now')
+            """)
+            processed_today = cursor.fetchone()[0]
+            
+            # Files in queue
+            cursor.execute("""
+                SELECT COUNT(*) FROM auto_ingestion_queue 
+                WHERE status IN ('pending', 'processing')
+            """)
+            queue_count = cursor.fetchone()[0]
+            
+            # Failed files
+            cursor.execute("""
+                SELECT COUNT(*) FROM auto_ingestion_queue 
+                WHERE status = 'failed'
+            """)
+            failed_count = cursor.fetchone()[0]
+            
+            return {
+                'active_workflows': active_workflows,
+                'processed_today': processed_today,
+                'queue_count': queue_count,
+                'failed_count': failed_count
+            }
+        finally:
+            conn.close()
 
 # Global database instance
 db = IDMSDatabase()

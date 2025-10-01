@@ -23,6 +23,7 @@ python scripts/clean_database.py
 **What it does:**
 - ✅ Preserves admin user (username: 'admin')
 - ❌ Deletes all non-admin users
+- ❌ Deletes all Auto Ingestion workflows, queue, and logs
 - ❌ Deletes all AI document classifications
 - ❌ Deletes all GhostLayer documents
 - ❌ Deletes all processing logs
