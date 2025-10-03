@@ -383,8 +383,8 @@ def startup_event():
         categories = load_existing_categories()
         logger.info(f"Loaded {len(categories)} existing categories on startup.")
         
-        # Start background task for system status checking
-        asyncio.create_task(check_system_status_periodically())
+        # Background task for system status checking disabled - now manual only
+        # asyncio.create_task(check_system_status_periodically())
     except Exception as e:
         logger.warning(f"Failed to load categories on startup: {e}")
 
@@ -480,15 +480,15 @@ async def check_system_status():
     logger.info(f"System status updated: WatsonX={watsonx_result['status']}, FileNet={filenet_result['status']}")
     return system_status
 
-async def check_system_status_periodically():
-    """Background task to check system status every 30 seconds"""
-    while True:
-        try:
-            await check_system_status()
-        except Exception as e:
-            logger.error(f"Error checking system status: {e}")
-        
-        await asyncio.sleep(30)  # Check every 30 seconds
+# async def check_system_status_periodically():
+#     """Background task to check system status every 30 seconds - DISABLED"""
+#     while True:
+#         try:
+#             await check_system_status()
+#         except Exception as e:
+#             logger.error(f"Error checking system status: {e}")
+#         
+#         await asyncio.sleep(30)  # Check every 30 seconds
 
 @app.get("/api/system-status")
 async def get_system_status():

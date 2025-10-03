@@ -606,21 +606,19 @@
             fetch('/api/system-status')
                 .then(response => response.json())
                 .then(data => {
-                    updateStatusElement('watsonx-status', data.watsonx_ai.status, 'WatsonX AI');
                     updateStatusElement('filenet-status', data.filenet.status, 'FileNet');
                     updateStatusElement('server-status', data.server.status, 'Server');
                     
                     // Update last updated time
                     const lastUpdated = document.getElementById('last-updated');
-                    if (lastUpdated && data.watsonx_ai.last_check) {
-                        const date = new Date(data.watsonx_ai.last_check);
+                    if (lastUpdated && data.filenet.last_check) {
+                        const date = new Date(data.filenet.last_check);
                         lastUpdated.textContent = `Last updated: ${date.toLocaleTimeString()}`;
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching system status:', error);
                     // Show error status
-                    updateStatusElement('watsonx-status', 'error', 'WatsonX AI');
                     updateStatusElement('filenet-status', 'error', 'FileNet');
                 });
         }
