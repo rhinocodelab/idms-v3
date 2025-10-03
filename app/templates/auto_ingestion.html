@@ -2,7 +2,7 @@
 
 {% block title %}Auto Ingestion Workflow - IDMS{% endblock %}
 
-{% block page_title %}Auto Ingestion Workflow{% endblock %}
+{% block page_title %}Document Classification{% endblock %}
 {% block page_subtitle %}Automated document processing from monitored folders{% endblock %}
 
 {% block content %}
@@ -925,6 +925,15 @@ function showNotification(type, message) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+    // Keep Document Classification submenu open when on Auto Ingestion page
+    const submenu = document.getElementById('upload-submenu');
+    const arrow = document.getElementById('upload-menu-arrow');
+    
+    if (submenu && arrow) {
+        submenu.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+    }
+    
     loadDashboardStats();
     loadWorkflows();
     

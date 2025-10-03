@@ -114,6 +114,11 @@
             width: 5rem; /* 80px */
         }
         
+        /* Prevent transitions when clicking menu items in collapsed state */
+        #sidebar.collapsed.prevent-transition {
+            transition: none !important;
+        }
+        
         #sidebar.collapsed .sidebar-text {
             opacity: 0;
             display: none;
@@ -129,6 +134,27 @@
         
         #sidebar.collapsed #upload-submenu {
             display: none !important;
+        }
+        
+        #sidebar.collapsed .document-classification-menu {
+            display: none !important;
+        }
+        
+        #sidebar.collapsed .collapsed-menu-item {
+            display: block;
+        }
+        
+        .collapsed-menu-item {
+            display: none;
+        }
+        
+        /* Ensure collapsed menu items are hidden when sidebar is not collapsed */
+        #sidebar:not(.collapsed) .collapsed-menu-item {
+            display: none !important;
+        }
+        
+        #sidebar.collapsed .sidebar-logo {
+            display: none;
         }
     </style>
     
@@ -146,7 +172,7 @@
             <div class="p-6 border-b border-gray-700 flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3 overflow-hidden">
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 sidebar-logo">
                         <img src="{{ url_for('static', path='images/cybercorp_logo.png') }}" alt="CyberCorp Logo" class="h-16 w-16 object-contain">
                     </div>
                         <div class="sidebar-text transition-opacity duration-300">
@@ -169,7 +195,7 @@
                     </a>
                     
                     <!-- Document Classification Menu with Sub-menus -->
-                    <div class="mb-2">
+                    <div class="mb-2 document-classification-menu">
                         <button onclick="toggleUploadMenu()" class="flex items-center justify-between w-full px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/upload' or request.url.path == '/auto-ingestion' %}bg-gray-800 text-white{% endif %}">
                             <div class="flex items-center">
                                 <i class="fas fa-file-alt mr-2 flex-shrink-0 text-base"></i>
@@ -196,6 +222,19 @@
                             </a> -->
                         </div>
                     </div>
+                    
+                    <!-- Collapsed Menu Items - Manual Ingestion and Auto Ingestion -->
+                    <a href="/upload#ai-classification" class="collapsed-menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/upload' %}bg-gray-800 text-white{% endif %}">
+                        <i class="fas fa-hand-pointer mr-3 flex-shrink-0 text-base"></i>
+                        <span class="menu-text text-sm">Manual Ingestion</span>
+                    </a>
+                    {% if user and user.role == 'admin' %}
+                    <a href="/auto-ingestion" class="collapsed-menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/auto-ingestion' %}bg-gray-800 text-white{% endif %}">
+                        <i class="fas fa-robot mr-3 flex-shrink-0 text-base"></i>
+                        <span class="menu-text text-sm">Auto Ingestion</span>
+                    </a>
+                    {% endif %}
+                    
                     <a href="/ghostlayer-ai" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white mb-2 transition-colors duration-200 {% if request.url.path == '/ghostlayer-ai' %}bg-gray-800 text-white{% endif %}">
                         <i class="fas fa-ghost mr-3 flex-shrink-0 text-base"></i>
                         <span class="menu-text text-sm">GhostLayer AI</span>
@@ -288,7 +327,7 @@
                         <!-- Profile Card Button with Avatar -->
                         <div class="relative">
                             <button onclick="toggleProfileDropdown()" 
-                                    class="flex items-center space-x-3 bg-gray-100 hover:bg-gray-200 px-4 py-2 transition-colors border border-gray-300">
+                                    class="flex items-center space-x-3 bg-gray-100 hover:bg-gray-200 px-4 py-2 transition-colors">
                                 <!-- Avatar with Initials -->
                                 <div id="user-avatar" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm">
                                     --
@@ -470,13 +509,16 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', path='js/main.js') }}"></script>
     <script>
-        // Sidebar toggle functionality
+        // Sidebar toggle functionality (mobile only)
         document.getElementById('sidebar-toggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
+            // Only toggle mobile sidebar if not in collapsed desktop mode
+            if (!sidebar.classList.contains('collapsed')) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
         });
 
         // Close sidebar when clicking overlay
@@ -572,21 +614,6 @@
         }
 
         // Toggle upload submenu
-        // Toggle Sidebar
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleIcon = document.getElementById('sidebar-toggle-icon');
-            
-            sidebar.classList.toggle('collapsed');
-            
-            if (sidebar.classList.contains('collapsed')) {
-                toggleIcon.classList.remove('fa-chevron-left');
-                toggleIcon.classList.add('fa-chevron-right');
-            } else {
-                toggleIcon.classList.remove('fa-chevron-right');
-                toggleIcon.classList.add('fa-chevron-left');
-            }
-        }
         
         function toggleUploadMenu() {
             const submenu = document.getElementById('upload-submenu');
@@ -713,6 +740,73 @@
                 localStorage.removeItem('user');
                 localStorage.removeItem('token');
                 window.location.href = '/login';
+            }
+        }
+
+        // Prevent sidebar from expanding when ANY menu item is clicked in collapsed state
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            
+            // If sidebar is collapsed, prevent expansion for any menu link
+            if (sidebar.classList.contains('collapsed')) {
+                // Check if clicked element is any menu link (not the toggle button)
+                if (event.target.closest('nav a') && !event.target.closest('button')) {
+                    // Prevent transitions and ensure sidebar stays collapsed
+                    sidebar.classList.add('prevent-transition');
+                    sidebar.classList.add('collapsed');
+                    
+                    // Stop all event propagation and default behavior
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    
+                    // Get the href and navigate manually to preserve collapsed state
+                    const link = event.target.closest('a');
+                    if (link && link.href) {
+                        // Navigate immediately without delay
+                        window.location.href = link.href;
+                    }
+                }
+            }
+        });
+
+        // Override any potential sidebar expansion on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if sidebar was collapsed before page reload
+            const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (wasCollapsed) {
+                const sidebar = document.getElementById('sidebar');
+                const toggleIcon = document.getElementById('sidebar-toggle-icon');
+                
+                sidebar.classList.add('collapsed');
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            }
+            
+            // Remove prevent-transition class on page load to restore normal transitions
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('prevent-transition');
+            }
+        });
+
+        // Save sidebar state when toggling
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed.toString());
+            
+            if (isCollapsed) {
+                toggleIcon.classList.remove('fa-chevron-left');
+                toggleIcon.classList.add('fa-chevron-right');
+            } else {
+                toggleIcon.classList.remove('fa-chevron-right');
+                toggleIcon.classList.add('fa-chevron-left');
             }
         }
 
