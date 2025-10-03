@@ -3175,3 +3175,544 @@ async def get_workflow_logs(workflow_id: int, request: Request):
     except Exception as e:
         logger.error(f"Error getting logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Criticality Configuration Routes (Admin only)
+@app.get("/criticality-config", response_class=HTMLResponse)
+async def criticality_config_page(request: Request):
+    """Serve the criticality configuration page (requires admin authentication)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse("criticality_config.html", {"request": request, "user": user})
+
+@app.get("/api/criticality-config")
+async def get_criticality_config(request: Request):
+    """Get all criticality configurations (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        
+        if not os.path.exists(config_path):
+            logger.error(f"Criticality config file not found: {config_path}")
+            return {"configurations": {}}
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            configurations = json.load(f)
+        
+        return {"configurations": configurations}
+    except Exception as e:
+        logger.error(f"Error loading criticality config: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load configurations")
+
+@app.post("/api/criticality-config")
+async def create_criticality_config(request: Request):
+    """Create new criticality configuration (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        data = await request.json()
+        document_type = data.get("document_type")
+        criticality_level = data.get("criticality_level")
+        
+        if not document_type or not criticality_level:
+            raise HTTPException(status_code=400, detail="Document type and criticality level are required")
+        
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            configurations = {}
+        
+        # Check if document type already exists
+        if document_type in configurations:
+            raise HTTPException(status_code=400, detail="Document type already exists")
+        
+        # Add new configuration
+        configurations[document_type] = criticality_level
+        
+        # Save back to file
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=4, ensure_ascii=False)
+        
+        return {"message": "Configuration created successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating criticality config: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create configuration")
+
+@app.put("/api/criticality-config/{document_type}")
+async def update_criticality_config(document_type: str, request: Request):
+    """Update criticality configuration (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        data = await request.json()
+        new_document_type = data.get("document_type")
+        criticality_level = data.get("criticality_level")
+        
+        if not new_document_type or not criticality_level:
+            raise HTTPException(status_code=400, detail="Document type and criticality level are required")
+        
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            raise HTTPException(status_code=404, detail="Configuration not found")
+        
+        # Check if old document type exists
+        if document_type not in configurations:
+            raise HTTPException(status_code=404, detail="Document type not found")
+        
+        # If document type is changing, check for conflicts
+        if document_type != new_document_type and new_document_type in configurations:
+            raise HTTPException(status_code=400, detail="New document type already exists")
+        
+        # Update configuration
+        if document_type != new_document_type:
+            # Remove old key and add new one
+            del configurations[document_type]
+        configurations[new_document_type] = criticality_level
+        
+        # Save back to file
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=4, ensure_ascii=False)
+        
+        return {"message": "Configuration updated successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating criticality config: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update configuration")
+
+@app.delete("/api/criticality-config/{document_type}")
+async def delete_criticality_config(document_type: str, request: Request):
+    """Delete criticality configuration (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            raise HTTPException(status_code=404, detail="Configuration not found")
+        
+        # Check if document type exists
+        if document_type not in configurations:
+            raise HTTPException(status_code=404, detail="Document type not found")
+        
+        # Remove configuration
+        del configurations[document_type]
+        
+        # Save back to file
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=4, ensure_ascii=False)
+        
+        return {"message": "Configuration deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting criticality config: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete configuration")
+
+@app.get("/api/criticality-config/system")
+async def get_system_settings(request: Request):
+    """Get system settings (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            configurations = {}
+        
+        return {
+            "storage_type": configurations.get("storage type", "Local Folder"),
+            "retention_period": configurations.get("retention period", "3")
+        }
+    except Exception as e:
+        logger.error(f"Error loading system settings: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load system settings")
+
+@app.put("/api/criticality-config/system")
+async def update_system_settings(request: Request):
+    """Update system settings (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        data = await request.json()
+        storage_type = data.get("storage_type")
+        retention_period = data.get("retention_period")
+        
+        if not storage_type or not retention_period:
+            raise HTTPException(status_code=400, detail="Storage type and retention period are required")
+        
+        import json
+        import os
+        
+        config_path = get_criticality_config_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            configurations = {}
+        
+        # Update system settings
+        configurations["storage type"] = storage_type
+        configurations["retention period"] = str(retention_period)
+        
+        # Save back to file
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=4, ensure_ascii=False)
+        
+        return {"message": "System settings updated successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating system settings: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update system settings")
+
+def get_criticality_config_path():
+    """Get the correct path for the criticality config file"""
+    import os
+    possible_paths = [
+        "app/criticality_config.json",
+        "criticality_config.json", 
+        "./app/criticality_config.json",
+        "../app/criticality_config.json"
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    
+    return "app/criticality_config.json"  # Default fallback
+
+def get_document_identification_path():
+    """Get the correct path for the document identification config file"""
+    import os
+    possible_paths = [
+        "app/document_identification.json",
+        "document_identification.json", 
+        "./app/document_identification.json",
+        "../app/document_identification.json"
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    
+    return "app/document_identification.json"  # Default fallback
+
+@app.get("/api/criticality-config/debug")
+async def debug_criticality_config(request: Request):
+    """Debug endpoint to check file reading"""
+    try:
+        import json
+        import os
+        
+        # Try different possible paths for the config file
+        possible_paths = [
+            "app/criticality_config.json",
+            "criticality_config.json", 
+            "./app/criticality_config.json",
+            "../app/criticality_config.json"
+        ]
+        
+        config_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                config_path = path
+                break
+        
+        file_exists = config_path is not None
+        file_size = os.path.getsize(config_path) if file_exists else 0
+        
+        if file_exists:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                configurations = json.loads(content)
+        else:
+            configurations = {}
+        
+        return {
+            "file_path": config_path,
+            "file_exists": file_exists,
+            "file_size": file_size,
+            "raw_content": content if file_exists else "File not found",
+            "parsed_configurations": configurations,
+            "config_count": len(configurations)
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+# Document Identification Routes
+@app.get("/document-identification")
+async def document_identification_page(request: Request):
+    """Document identification configuration page (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    return templates.TemplateResponse("document_identification.html", {"request": request})
+
+@app.get("/api/document-identification")
+async def get_document_identification(request: Request):
+    """Get all document identification configurations (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        if not os.path.exists(config_path):
+            logger.error(f"Document identification config file not found: {config_path}")
+            return {"configurations": {}}
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            configurations = json.load(f)
+        
+        return {"configurations": configurations}
+    except Exception as e:
+        logger.error(f"Error loading document identification config: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load configurations")
+
+@app.post("/api/document-identification")
+async def create_document_type(request: Request, data: dict):
+    """Create a new document type (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            configurations = {"document_types": {}, "classification_settings": {}}
+        
+        # Add new document type
+        document_key = data.get("document_key")
+        if not document_key:
+            raise HTTPException(status_code=400, detail="Document key is required")
+        
+        if document_key in configurations.get("document_types", {}):
+            raise HTTPException(status_code=400, detail="Document type already exists")
+        
+        configurations["document_types"][document_key] = {
+            "name": data.get("document_name"),
+            "description": data.get("document_description"),
+            "keywords": data.get("keywords", []),
+            "confidence_threshold": data.get("confidence_threshold", 0.5)
+        }
+        
+        # Save configurations
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Document type created successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating document type: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create document type")
+
+@app.put("/api/document-identification/{document_key}")
+async def update_document_type(request: Request, document_key: str, data: dict):
+    """Update an existing document type (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        if not os.path.exists(config_path):
+            raise HTTPException(status_code=404, detail="Configuration file not found")
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            configurations = json.load(f)
+        
+        if document_key not in configurations.get("document_types", {}):
+            raise HTTPException(status_code=404, detail="Document type not found")
+        
+        # Update document type
+        configurations["document_types"][document_key] = {
+            "name": data.get("document_name"),
+            "description": data.get("document_description"),
+            "keywords": data.get("keywords", []),
+            "confidence_threshold": data.get("confidence_threshold", 0.5)
+        }
+        
+        # Save configurations
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Document type updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating document type: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update document type")
+
+@app.delete("/api/document-identification/{document_key}")
+async def delete_document_type(request: Request, document_key: str):
+    """Delete a document type (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        if not os.path.exists(config_path):
+            raise HTTPException(status_code=404, detail="Configuration file not found")
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            configurations = json.load(f)
+        
+        if document_key not in configurations.get("document_types", {}):
+            raise HTTPException(status_code=404, detail="Document type not found")
+        
+        # Delete document type
+        del configurations["document_types"][document_key]
+        
+        # Save configurations
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Document type deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting document type: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete document type")
+
+@app.get("/api/document-identification/settings")
+async def get_classification_settings(request: Request):
+    """Get classification settings (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        if not os.path.exists(config_path):
+            return {"case_sensitive": False, "minimum_keywords_found": 1, "fallback_document_type": "unknown"}
+        
+        with open(config_path, 'r', encoding='utf-8') as f:
+            configurations = json.load(f)
+        
+        settings = configurations.get("classification_settings", {})
+        return {
+            "case_sensitive": settings.get("case_sensitive", False),
+            "minimum_keywords_found": settings.get("minimum_keywords_found", 1),
+            "fallback_document_type": settings.get("fallback_document_type", "unknown")
+        }
+    except Exception as e:
+        logger.error(f"Error loading classification settings: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load classification settings")
+
+@app.put("/api/document-identification/settings")
+async def update_classification_settings(request: Request, data: dict):
+    """Update classification settings (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        config_path = get_document_identification_path()
+        
+        # Load existing configurations
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                configurations = json.load(f)
+        else:
+            configurations = {"document_types": {}, "classification_settings": {}}
+        
+        # Update classification settings
+        configurations["classification_settings"] = {
+            "case_sensitive": data.get("case_sensitive", False),
+            "partial_match": True,  # Keep existing setting
+            "minimum_keywords_found": data.get("minimum_keywords_found", 1),
+            "fallback_document_type": data.get("fallback_document_type", "unknown")
+        }
+        
+        # Save configurations
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(configurations, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Classification settings updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating classification settings: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update classification settings")

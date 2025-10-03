@@ -1,6 +1,6 @@
 {
-    "Pan Card": "Top Secret",
-    "Aadhar Card": "Public",
+	"Pan Card":"Confidential",
+    "Aadhar Card":"Public",
     "Non-Disclosure Agreement (NDA)": "Confidential",
     "NDA": "Confidential",
     "Bank Transaction Data": "Restricted",
@@ -11,7 +11,6 @@
     "Employee Handbook": "Confidential",
     "Business Proposal": "Top Secret",
     "Invoice": "Restricted",
-    "storage type": "Cloud Storage",
-    "retention period": "5",
-    "Passport": "Confidential"
+    "storage type": "Local Folder",
+    "retention period": "3"
 }

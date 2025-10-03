@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Critical Document Configuration - IDMS{% endblock %}
+
+{% block page_title %}Critical Document Configuration{% endblock %}
+{% block page_subtitle %}Manage document criticality levels and classification rules{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-shield-alt mr-3 text-blue-600"></i>
+                    Critical Document Configuration
+                </h1>
+                <p class="text-gray-600 mt-2">Configure document types and their criticality levels for automated classification</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="loadConfigurations()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 text-sm flex items-center transition-colors">
+                    <i class="fas fa-refresh mr-1"></i>
+                    Refresh
+                </button>
+                <button onclick="showAddConfigModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm flex items-center transition-colors">
+                    <i class="fas fa-plus mr-1"></i>
+                    Add Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration List -->
+    <div class="bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Current Configurations</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="searchInput" class="text-sm font-medium text-gray-700">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Search document types..." 
+                               class="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="filterSelect" class="text-sm font-medium text-gray-700">Filter:</label>
+                        <select id="filterSelect" class="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All Criticality Levels</option>
+                            <option value="Public">Public</option>
+                            <option value="Restricted">Restricted</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Classified">Classified</option>
+                            <option value="Top Secret">Top Secret</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results Info -->
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                <div id="resultsInfo">Loading configurations...</div>
+                <div id="paginationInfo"></div>
+            </div>
+            
+            <!-- System Settings Section -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-md font-semibold text-gray-900 mb-4">System Settings</h3>
+                <div class="flex items-end gap-4">
+                    <div class="w-48">
+                        <label for="storageType" class="block text-sm font-medium text-gray-700 mb-2">Storage Type</label>
+                        <select id="storageType" class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Local Folder">Local Folder</option>
+                            <option value="Cloud Storage">Cloud Storage</option>
+                        </select>
+                    </div>
+                    <div class="w-32">
+                        <label for="retentionPeriod" class="block text-sm font-medium text-gray-700 mb-2">Retention Period (years)</label>
+                        <input type="number" id="retentionPeriod" min="1" max="10" class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <button onclick="saveSystemSettings()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-sm flex items-center transition-colors">
+                            <i class="fas fa-save mr-1"></i>
+                            Save System Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criticality Level</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="configTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Dynamic content will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button id="prevPageMobile" onclick="changePage(currentPage - 1)" 
+                        class="relative inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Previous
+                </button>
+                <button id="nextPageMobile" onclick="changePage(currentPage + 1)" 
+                        class="ml-3 relative inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700" id="paginationText">
+                        Showing <span id="startRecord">0</span> to <span id="endRecord">0</span> of <span id="totalRecords">0</span> results
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button id="prevPage" onclick="changePage(currentPage - 1)" 
+                                class="relative inline-flex items-center px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="sr-only">Previous</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div id="pageNumbers" class="flex">
+                            <!-- Page numbers will be generated here -->
+                        </div>
+                        
+                        <button id="nextPage" onclick="changePage(currentPage + 1)" 
+                                class="relative inline-flex items-center px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="sr-only">Next</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Add/Edit Configuration Modal -->
+<div id="configModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">
+                        <i class="fas fa-plus mr-2 text-blue-600"></i>Add Configuration
+                    </h3>
+                    <button onclick="hideConfigModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="configForm" class="p-6">
+                <div class="mb-4">
+                    <label for="documentType" class="block text-sm font-medium text-gray-700 mb-2">Document Type</label>
+                    <input type="text" id="documentType" required
+                           class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Pan Card, Aadhar Card, NDA">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="criticalityLevel" class="block text-sm font-medium text-gray-700 mb-2">Criticality Level</label>
+                    <select id="criticalityLevel" required
+                            class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select criticality level</option>
+                        <option value="Public">Public</option>
+                        <option value="Restricted">Restricted</option>
+                        <option value="Confidential">Confidential</option>
+                        <option value="Classified">Classified</option>
+                        <option value="Top Secret">Top Secret</option>
+                    </select>
+                </div>
+                
+                <div id="configError" class="hidden bg-red-50 border border-red-200 p-2 text-red-700 text-sm mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span id="configErrorText"></span>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideConfigModal()" 
+                            class="px-3 py-1 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-3 py-1 text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-1"></i>Save Configuration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Confirm Deletion
+                </h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">Are you sure you want to delete this configuration? This action cannot be undone.</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="hideDeleteModal()" 
+                            class="px-3 py-1 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDelete()" 
+                            class="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 transition-colors">
+                        <i class="fas fa-trash mr-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentConfigs = {};
+let allConfigs = []; // All configurations for filtering
+let filteredConfigs = []; // Filtered configurations
+let currentPage = 1;
+let recordsPerPage = 6;
+let editingKey = null;
+let deletingKey = null;
+
+// Load configurations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadConfigurations();
+    loadSystemSettings();
+    
+    // Add event listeners for search and filter
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('filterSelect').addEventListener('change', applyFilters);
+});
+
+// Load all configurations
+async function loadConfigurations() {
+    try {
+        const response = await fetch('/api/criticality-config');
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentConfigs = data.configurations;
+            prepareConfigurations();
+            applyFilters();
+        } else {
+            if (response.status === 403) {
+                showToast('error', 'Access Denied', 'Admin access required');
+            } else {
+                showToast('error', 'Error', data.detail || 'Failed to load configurations');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading configurations:', error);
+        showToast('error', 'Error', 'Network error loading configurations');
+    }
+}
+
+// Load system settings
+async function loadSystemSettings() {
+    try {
+        const response = await fetch('/api/criticality-config/system');
+        const data = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('storageType').value = data.storage_type || 'Local Folder';
+            document.getElementById('retentionPeriod').value = data.retention_period || '3';
+        } else {
+            console.error('Error loading system settings:', data);
+        }
+    } catch (error) {
+        console.error('Error loading system settings:', error);
+    }
+}
+
+// Prepare configurations for filtering and pagination
+function prepareConfigurations() {
+    // Filter out system settings and convert to array
+    allConfigs = Object.entries(currentConfigs)
+        .filter(([key, value]) => key !== 'storage type' && key !== 'retention period')
+        .map(([documentType, criticalityLevel]) => ({
+            documentType,
+            criticalityLevel
+        }));
+    
+    filteredConfigs = [...allConfigs];
+    currentPage = 1;
+}
+
+// Apply search and filter
+function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filterValue = document.getElementById('filterSelect').value;
+    
+    filteredConfigs = allConfigs.filter(config => {
+        const matchesSearch = config.documentType.toLowerCase().includes(searchTerm);
+        const matchesFilter = !filterValue || config.criticalityLevel === filterValue;
+        return matchesSearch && matchesFilter;
+    });
+    
+    currentPage = 1;
+    renderConfigurations();
+    updatePagination();
+}
+
+// Render configurations in table with pagination
+function renderConfigurations() {
+    const tbody = document.getElementById('configTableBody');
+    tbody.innerHTML = '';
+    
+    if (filteredConfigs.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                    No configurations found. Click "Add Configuration" to create one.
+                </td>
+            </tr>
+        `;
+        updateResultsInfo(0);
+        return;
+    }
+    
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, filteredConfigs.length);
+    const pageConfigs = filteredConfigs.slice(startIndex, endIndex);
+    
+    pageConfigs.forEach(config => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${config.documentType}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCriticalityBadgeClass(config.criticalityLevel)}">
+                    ${config.criticalityLevel}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button onclick="editConfig('${config.documentType}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="deleteConfig('${config.documentType}')" class="text-red-600 hover:text-red-900">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    updateResultsInfo(filteredConfigs.length);
+}
+
+// Update pagination controls
+function updatePagination() {
+    const totalPages = Math.ceil(filteredConfigs.length / recordsPerPage);
+    
+    // Update pagination info
+    const startRecord = filteredConfigs.length === 0 ? 0 : (currentPage - 1) * recordsPerPage + 1;
+    const endRecord = Math.min(currentPage * recordsPerPage, filteredConfigs.length);
+    
+    document.getElementById('startRecord').textContent = startRecord;
+    document.getElementById('endRecord').textContent = endRecord;
+    document.getElementById('totalRecords').textContent = filteredConfigs.length;
+    
+    // Update pagination buttons
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const prevPageMobile = document.getElementById('prevPageMobile');
+    const nextPageMobile = document.getElementById('nextPageMobile');
+    
+    prevPage.disabled = currentPage <= 1;
+    nextPage.disabled = currentPage >= totalPages;
+    prevPageMobile.disabled = currentPage <= 1;
+    nextPageMobile.disabled = currentPage >= totalPages;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = `relative inline-flex items-center px-3 py-1 border text-sm font-medium ${
+            i === currentPage 
+                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
+                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+        }`;
+        pageButton.onclick = () => changePage(i);
+        pageNumbers.appendChild(pageButton);
+    }
+}
+
+// Change page
+function changePage(page) {
+    const totalPages = Math.ceil(filteredConfigs.length / recordsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderConfigurations();
+        updatePagination();
+    }
+}
+
+// Update results info
+function updateResultsInfo(total) {
+    const resultsInfo = document.getElementById('resultsInfo');
+    if (total === 0) {
+        resultsInfo.textContent = 'No configurations found';
+    } else {
+        resultsInfo.textContent = `Found ${total} configuration${total !== 1 ? 's' : ''}`;
+    }
+}
+
+// Get badge class for criticality level
+function getCriticalityBadgeClass(level) {
+    const classes = {
+        'Public': 'bg-green-100 text-green-800',
+        'Restricted': 'bg-yellow-100 text-yellow-800',
+        'Confidential': 'bg-orange-100 text-orange-800',
+        'Classified': 'bg-red-100 text-red-800',
+        'Top Secret': 'bg-purple-100 text-purple-800'
+    };
+    return classes[level] || 'bg-gray-100 text-gray-800';
+}
+
+// Show add configuration modal
+function showAddConfigModal() {
+    editingKey = null;
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus mr-2 text-blue-600"></i>Add Configuration';
+    document.getElementById('configForm').reset();
+    hideConfigError();
+    document.getElementById('configModal').classList.remove('hidden');
+}
+
+// Edit configuration
+function editConfig(documentType) {
+    editingKey = documentType;
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit mr-2 text-blue-600"></i>Edit Configuration';
+    document.getElementById('documentType').value = documentType;
+    document.getElementById('criticalityLevel').value = currentConfigs[documentType];
+    hideConfigError();
+    document.getElementById('configModal').classList.remove('hidden');
+}
+
+// Delete configuration
+function deleteConfig(documentType) {
+    deletingKey = documentType;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+// Hide modals
+function hideConfigModal() {
+    document.getElementById('configModal').classList.add('hidden');
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Show/hide error messages
+function showConfigError(message) {
+    const errorDiv = document.getElementById('configError');
+    const errorText = document.getElementById('configErrorText');
+    errorText.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+function hideConfigError() {
+    document.getElementById('configError').classList.add('hidden');
+}
+
+// Handle form submission
+document.getElementById('configForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const documentType = document.getElementById('documentType').value.trim();
+    const criticalityLevel = document.getElementById('criticalityLevel').value;
+    
+    if (!documentType || !criticalityLevel) {
+        showConfigError('Please fill in all fields');
+        return;
+    }
+    
+    // Check for duplicates (only for new entries)
+    if (!editingKey && currentConfigs[documentType]) {
+        showConfigError('A configuration for this document type already exists');
+        return;
+    }
+    
+    try {
+        const url = editingKey ? `/api/criticality-config/${encodeURIComponent(editingKey)}` : '/api/criticality-config';
+        const method = editingKey ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                document_type: documentType,
+                criticality_level: criticalityLevel
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            hideConfigModal();
+            showToast('success', 'Success', data.message);
+            loadConfigurations(); // Reload the list
+        } else {
+            showConfigError(data.message || 'Failed to save configuration');
+        }
+    } catch (error) {
+        console.error('Error saving configuration:', error);
+        showConfigError('Network error. Please try again.');
+    }
+});
+
+// Confirm delete
+async function confirmDelete() {
+    if (!deletingKey) return;
+    
+    try {
+        const response = await fetch(`/api/criticality-config/${encodeURIComponent(deletingKey)}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            hideDeleteModal();
+            showToast('success', 'Success', data.message);
+            loadConfigurations(); // Reload the list
+        } else {
+            showToast('error', 'Error', data.message || 'Failed to delete configuration');
+        }
+    } catch (error) {
+        console.error('Error deleting configuration:', error);
+        showToast('error', 'Error', 'Network error. Please try again.');
+    }
+}
+
+// Save system settings
+async function saveSystemSettings() {
+    const storageType = document.getElementById('storageType').value;
+    const retentionPeriod = document.getElementById('retentionPeriod').value;
+    
+    try {
+        const response = await fetch('/api/criticality-config/system', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                storage_type: storageType,
+                retention_period: retentionPeriod
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast('success', 'Success', 'System settings saved successfully');
+        } else {
+            showToast('error', 'Error', data.message || 'Failed to save system settings');
+        }
+    } catch (error) {
+        console.error('Error saving system settings:', error);
+        showToast('error', 'Error', 'Network error. Please try again.');
+    }
+}
+</script>
+{% endblock %}

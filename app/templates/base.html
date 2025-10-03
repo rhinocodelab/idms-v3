@@ -258,6 +258,16 @@
                             <span class="menu-text">User Management</span>
                         </a>
                         
+                        <a href="/criticality-config" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/criticality-config' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-shield-alt mr-2 flex-shrink-0 text-sm"></i>
+                            <span class="menu-text">Critical Document Config</span>
+                        </a>
+                        
+                        <a href="/document-identification" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/document-identification' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-file-signature mr-2 flex-shrink-0 text-sm"></i>
+                            <span class="menu-text">Document Identification</span>
+                        </a>
+                        
                         <a href="https://win-1gpq0nalnpb:9443/acce/login.jsp" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200" title="Administration Console for Content Platform Engine">
                             <i class="fas fa-external-link-alt mr-2 flex-shrink-0 text-sm"></i>
                             <span class="menu-text">ACCE Console</span>
