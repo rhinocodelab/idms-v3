@@ -1,0 +1,743 @@
+{% extends "base.html" %}
+
+{% block title %}Document Categories Management - IDMS{% endblock %}
+
+{% block page_title %}Document Categories Management{% endblock %}
+{% block page_subtitle %}Manage document categories and their properties{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-folder-open mr-3 text-blue-600"></i>
+                    Document Categories Management
+                </h1>
+                <p class="text-gray-600 mt-2">View predefined document categories from existing_categories.txt. These categories are read-only and cannot be modified.</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="loadCategories()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 text-sm flex items-center transition-colors">
+                    <i class="fas fa-refresh mr-1"></i>
+                    Refresh
+                </button>
+                <button onclick="showAddCategoryModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm flex items-center transition-colors">
+                    <i class="fas fa-plus mr-1"></i>
+                    Add Category
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories List -->
+    <div class="bg-white shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">Predefined Document Categories (Read-only)</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="searchInput" class="text-sm font-medium text-gray-700">Search:</label>
+                        <input type="text" id="searchInput" placeholder="Search categories..." 
+                               class="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="filterSelect" class="text-sm font-medium text-gray-700">Filter:</label>
+                        <select id="filterSelect" class="px-2 py-1 border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All Categories</option>
+                            <option value="identity">Identity Documents</option>
+                            <option value="business">Business Documents</option>
+                            <option value="technical">Technical Documents</option>
+                            <option value="financial">Financial Documents</option>
+                            <option value="legal">Legal Documents</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results Info -->
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                <div id="resultsInfo">Loading categories...</div>
+                <div id="paginationInfo"></div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Dynamic content will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button id="prevPageMobile" onclick="changePage(currentPage - 1)" 
+                        class="relative inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Previous
+                </button>
+                <button id="nextPageMobile" onclick="changePage(currentPage + 1)" 
+                        class="ml-3 relative inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Next
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700" id="paginationText">
+                        Showing <span id="startRecord">0</span> to <span id="endRecord">0</span> of <span id="totalRecords">0</span> results
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <button id="prevPage" onclick="changePage(currentPage - 1)" 
+                                class="relative inline-flex items-center px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="sr-only">Previous</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div id="pageNumbers" class="flex">
+                            <!-- Page numbers will be generated here -->
+                        </div>
+                        
+                        <button id="nextPage" onclick="changePage(currentPage + 1)" 
+                                class="relative inline-flex items-center px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="sr-only">Next</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Category Modal -->
+<div id="categoryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-lg w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">
+                        <i class="fas fa-plus mr-2 text-blue-600"></i>Add Category
+                    </h3>
+                    <button onclick="hideCategoryModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="categoryForm" class="p-6">
+                <div class="mb-4">
+                    <label for="categoryName" class="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
+                    <input type="text" id="categoryName" required
+                           class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Identity Documents, Business Proposals">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="categoryDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="categoryDescription" rows="3" required
+                              class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Brief description of this category"></textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="categoryType" class="block text-sm font-medium text-gray-700 mb-2">Category Type</label>
+                    <select id="categoryType" required
+                            class="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select category type</option>
+                        <option value="identity">Identity Documents</option>
+                        <option value="business">Business Documents</option>
+                        <option value="technical">Technical Documents</option>
+                        <option value="financial">Financial Documents</option>
+                        <option value="legal">Legal Documents</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div id="categoryError" class="hidden bg-red-50 border border-red-200 p-2 text-red-700 text-sm mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span id="categoryErrorText"></span>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideCategoryModal()" 
+                            class="px-3 py-1 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-3 py-1 text-sm bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-1"></i>Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white shadow-xl max-w-md w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Confirm Deletion
+                </h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">Are you sure you want to delete this category? This action cannot be undone.</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="hideDeleteModal()" 
+                            class="px-3 py-1 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="confirmDelete()" 
+                            class="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 transition-colors">
+                        <i class="fas fa-trash mr-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentCategories = {};
+let allCategories = []; // All categories for filtering
+let filteredCategories = []; // Filtered categories
+let currentPage = 1;
+let recordsPerPage = 6;
+let editingKey = null;
+let deletingKey = null;
+
+// Load categories on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCategories();
+    
+    // Add event listeners for search and filter
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('filterSelect').addEventListener('change', applyFilters);
+});
+
+// Load all categories
+async function loadCategories() {
+    try {
+        // First, try to load user-added categories from API
+        let userCategories = {};
+        try {
+            const response = await fetch('/api/document-categories');
+            if (response.ok) {
+                const data = await response.json();
+                userCategories = data.categories || {};
+            }
+        } catch (error) {
+            console.log('No user categories found, using only hardcoded categories');
+        }
+        
+        // Hardcoded categories from existing_categories.txt
+        const hardcodedCategories = {
+            "category_1": {
+                "name": "Non-Disclosure Agreement (NDA)",
+                "description": "Legal documents for confidentiality agreements",
+                "type": "legal",
+                "created": "2024-01-01 00:00"
+            },
+            "category_2": {
+                "name": "Business Proposal",
+                "description": "Business proposals and commercial documents",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_3": {
+                "name": "Employee Handbook",
+                "description": "Employee handbooks and HR documentation",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_4": {
+                "name": "Job Description",
+                "description": "Job descriptions and role specifications",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_5": {
+                "name": "Bank Transaction Data",
+                "description": "Banking and financial transaction records",
+                "type": "financial",
+                "created": "2024-01-01 00:00"
+            },
+            "category_6": {
+                "name": "Census and Demographic Data",
+                "description": "Population and demographic information",
+                "type": "other",
+                "created": "2024-01-01 00:00"
+            },
+            "category_7": {
+                "name": "Public Health Data",
+                "description": "Health and medical information",
+                "type": "other",
+                "created": "2024-01-01 00:00"
+            },
+            "category_8": {
+                "name": "Ledger Files",
+                "description": "Accounting and financial ledger records",
+                "type": "financial",
+                "created": "2024-01-01 00:00"
+            },
+            "category_9": {
+                "name": "Batch Scripts",
+                "description": "Automation and batch processing scripts",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_10": {
+                "name": "Source Code",
+                "description": "Software source code and programming files",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_11": {
+                "name": "Pan Card",
+                "description": "Indian Permanent Account Number cards",
+                "type": "identity",
+                "created": "2024-01-01 00:00"
+            },
+            "category_12": {
+                "name": "Voter ID",
+                "description": "Voter identification cards and documents",
+                "type": "identity",
+                "created": "2024-01-01 00:00"
+            },
+            "category_13": {
+                "name": "Passport",
+                "description": "International passport documents",
+                "type": "identity",
+                "created": "2024-01-01 00:00"
+            },
+            "category_14": {
+                "name": "Driving License",
+                "description": "Driver's license and motor vehicle permits",
+                "type": "identity",
+                "created": "2024-01-01 00:00"
+            },
+            "category_15": {
+                "name": "Healthcare Records",
+                "description": "Medical and healthcare documentation",
+                "type": "other",
+                "created": "2024-01-01 00:00"
+            },
+            "category_16": {
+                "name": "Geospatial and Location Data",
+                "description": "Geographic and location-based information",
+                "type": "other",
+                "created": "2024-01-01 00:00"
+            },
+            "category_17": {
+                "name": "Customer Feedback",
+                "description": "Customer reviews and feedback data",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_18": {
+                "name": "Authentication Logs",
+                "description": "Security and authentication log files",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_19": {
+                "name": "Utility Bills",
+                "description": "Electricity, water, gas, and utility bills",
+                "type": "financial",
+                "created": "2024-01-01 00:00"
+            },
+            "category_20": {
+                "name": "Kubernetes configuration files",
+                "description": "Container orchestration configuration files",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_21": {
+                "name": "CI/CD pipeline definitions",
+                "description": "Continuous integration and deployment configurations",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_22": {
+                "name": "Data Serialization",
+                "description": "Data serialization and format conversion files",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_23": {
+                "name": "Infrastructure as Code",
+                "description": "Infrastructure automation and configuration files",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_24": {
+                "name": "Metadata Storage",
+                "description": "Metadata and data catalog information",
+                "type": "technical",
+                "created": "2024-01-01 00:00"
+            },
+            "category_25": {
+                "name": "Research Paper",
+                "description": "Academic and research documentation",
+                "type": "other",
+                "created": "2024-01-01 00:00"
+            },
+            "category_26": {
+                "name": "Meeting Notes",
+                "description": "Meeting minutes and conference notes",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_27": {
+                "name": "Resume",
+                "description": "Personal resumes and curriculum vitae",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_28": {
+                "name": "Press Release",
+                "description": "Public relations and media communications",
+                "type": "business",
+                "created": "2024-01-01 00:00"
+            },
+            "category_29": {
+                "name": "Aadhar Card",
+                "description": "Indian Aadhaar identity cards",
+                "type": "identity",
+                "created": "2024-01-01 00:00"
+            }
+        };
+        
+        // Merge hardcoded and user categories
+        currentCategories = { ...hardcodedCategories, ...userCategories };
+        prepareCategories();
+        applyFilters();
+        
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        showToast('error', 'Error', 'Failed to load categories');
+    }
+}
+
+// Prepare categories for filtering and pagination
+function prepareCategories() {
+    // Convert categories to array format
+    allCategories = Object.entries(currentCategories).map(([key, value]) => ({
+        key,
+        name: value.name,
+        description: value.description,
+        type: value.type,
+        created: value.created || 'Unknown'
+    }));
+    
+    filteredCategories = [...allCategories];
+    currentPage = 1;
+}
+
+// Apply search and filter
+function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filterValue = document.getElementById('filterSelect').value;
+    
+    filteredCategories = allCategories.filter(category => {
+        const matchesSearch = category.name.toLowerCase().includes(searchTerm) || 
+                           category.description.toLowerCase().includes(searchTerm);
+        const matchesFilter = !filterValue || category.type === filterValue;
+        return matchesSearch && matchesFilter;
+    });
+    
+    currentPage = 1;
+    renderCategories();
+    updatePagination();
+}
+
+// Render categories in table with pagination
+function renderCategories() {
+    const tbody = document.getElementById('categoriesTableBody');
+    tbody.innerHTML = '';
+    
+    if (filteredCategories.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                    No categories found. Click "Add Category" to create one.
+                </td>
+            </tr>
+        `;
+        updateResultsInfo(0);
+        return;
+    }
+    
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, filteredCategories.length);
+    const pageCategories = filteredCategories.slice(startIndex, endIndex);
+    
+    pageCategories.forEach(category => {
+        const row = document.createElement('tr');
+        const isHardcoded = category.key.startsWith('category_') && parseInt(category.key.split('_')[1]) <= 29;
+        
+        let actionButtons = '';
+        if (isHardcoded) {
+            actionButtons = `
+                <button onclick="editCategory('${category.key}')" class="text-blue-600 hover:text-blue-900 mr-2" title="Edit" disabled>
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteCategory('${category.key}')" class="text-red-600 hover:text-red-900" title="Delete" disabled>
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        } else {
+            actionButtons = `
+                <button onclick="editCategory('${category.key}')" class="text-blue-600 hover:text-blue-900 mr-2" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteCategory('${category.key}')" class="text-red-600 hover:text-red-900" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+        }
+        
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${category.name}</td>
+            <td class="px-6 py-4 text-sm text-gray-500">${category.description}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${getCategoryTypeLabel(category.type)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${category.created}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                ${actionButtons}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    updateResultsInfo(filteredCategories.length);
+}
+
+// Get category type label
+function getCategoryTypeLabel(type) {
+    const labels = {
+        'identity': 'Identity Documents',
+        'business': 'Business Documents',
+        'technical': 'Technical Documents',
+        'financial': 'Financial Documents',
+        'legal': 'Legal Documents',
+        'other': 'Other'
+    };
+    return labels[type] || type;
+}
+
+// Update pagination controls
+function updatePagination() {
+    const totalPages = Math.ceil(filteredCategories.length / recordsPerPage);
+    
+    // Update pagination info
+    const startRecord = filteredCategories.length === 0 ? 0 : (currentPage - 1) * recordsPerPage + 1;
+    const endRecord = Math.min(currentPage * recordsPerPage, filteredCategories.length);
+    
+    document.getElementById('startRecord').textContent = startRecord;
+    document.getElementById('endRecord').textContent = endRecord;
+    document.getElementById('totalRecords').textContent = filteredCategories.length;
+    
+    // Update pagination buttons
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+    const prevPageMobile = document.getElementById('prevPageMobile');
+    const nextPageMobile = document.getElementById('nextPageMobile');
+    
+    prevPage.disabled = currentPage <= 1;
+    nextPage.disabled = currentPage >= totalPages;
+    prevPageMobile.disabled = currentPage <= 1;
+    nextPageMobile.disabled = currentPage >= totalPages;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = `relative inline-flex items-center px-3 py-1 border text-sm font-medium ${
+            i === currentPage 
+                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
+                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+        }`;
+        pageButton.onclick = () => changePage(i);
+        pageNumbers.appendChild(pageButton);
+    }
+}
+
+// Change page
+function changePage(page) {
+    const totalPages = Math.ceil(filteredCategories.length / recordsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderCategories();
+        updatePagination();
+    }
+}
+
+// Update results info
+function updateResultsInfo(total) {
+    const resultsInfo = document.getElementById('resultsInfo');
+    if (total === 0) {
+        resultsInfo.textContent = 'No categories found';
+    } else {
+        resultsInfo.textContent = `Found ${total} categor${total !== 1 ? 'ies' : 'y'}`;
+    }
+}
+
+// Show add category modal
+function showAddCategoryModal() {
+    editingKey = null;
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus mr-2 text-blue-600"></i>Add Category';
+    document.getElementById('categoryForm').reset();
+    hideCategoryError();
+    document.getElementById('categoryModal').classList.remove('hidden');
+}
+
+// Edit category
+function editCategory(categoryKey) {
+    editingKey = categoryKey;
+    const category = currentCategories[categoryKey];
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit mr-2 text-blue-600"></i>Edit Category';
+    document.getElementById('categoryName').value = category.name;
+    document.getElementById('categoryDescription').value = category.description;
+    document.getElementById('categoryType').value = category.type;
+    hideCategoryError();
+    document.getElementById('categoryModal').classList.remove('hidden');
+}
+
+// Delete category
+function deleteCategory(categoryKey) {
+    deletingKey = categoryKey;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+// Hide modals
+function hideCategoryModal() {
+    document.getElementById('categoryModal').classList.add('hidden');
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Show/hide error messages
+function showCategoryError(message) {
+    const errorDiv = document.getElementById('categoryError');
+    const errorText = document.getElementById('categoryErrorText');
+    errorText.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+function hideCategoryError() {
+    document.getElementById('categoryError').classList.add('hidden');
+}
+
+// Handle form submission
+document.getElementById('categoryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const categoryName = document.getElementById('categoryName').value.trim();
+    const categoryDescription = document.getElementById('categoryDescription').value.trim();
+    const categoryType = document.getElementById('categoryType').value;
+    
+    if (!categoryName || !categoryDescription || !categoryType) {
+        showCategoryError('Please fill in all fields');
+        return;
+    }
+    
+    // Check for duplicates (only for new entries)
+    if (!editingKey) {
+        const existingCategory = Object.values(currentCategories).find(cat => 
+            cat.name.toLowerCase() === categoryName.toLowerCase()
+        );
+        if (existingCategory) {
+            showCategoryError('A category with this name already exists');
+            return;
+        }
+    }
+    
+    try {
+        const url = editingKey ? `/api/document-categories/${encodeURIComponent(editingKey)}` : '/api/document-categories';
+        const method = editingKey ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: categoryName,
+                description: categoryDescription,
+                type: categoryType
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            hideCategoryModal();
+            showToast('success', 'Success', data.message);
+            loadCategories(); // Reload the list
+        } else {
+            showCategoryError(data.message || 'Failed to save category');
+        }
+    } catch (error) {
+        console.error('Error saving category:', error);
+        showCategoryError('Network error. Please try again.');
+    }
+});
+
+// Confirm delete
+async function confirmDelete() {
+    if (!deletingKey) return;
+    
+    try {
+        const response = await fetch(`/api/document-categories/${encodeURIComponent(deletingKey)}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            hideDeleteModal();
+            showToast('success', 'Success', data.message);
+            loadCategories(); // Reload the list
+        } else {
+            showToast('error', 'Error', data.message || 'Failed to delete category');
+        }
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        showToast('error', 'Error', 'Network error. Please try again.');
+    }
+}
+</script>
+{% endblock %}

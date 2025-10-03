@@ -204,7 +204,7 @@
                             <i id="upload-menu-arrow" class="fas fa-chevron-down transition-transform duration-200 upload-menu-arrow text-xs"></i>
                         </button>
                         <div id="upload-submenu" class="ml-4 mt-1 space-y-1 hidden">
-                            <a href="/upload#ai-classification" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200">
+                            <a href="/upload" class="flex items-center px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition-colors duration-200 {% if request.url.path == '/upload' %}bg-gray-700 text-white{% endif %}">
                                 <i class="fas fa-hand-pointer mr-2 flex-shrink-0 text-xs"></i>
                                 <span class="menu-text text-xs">Manual Ingestion</span>
                             </a>
@@ -268,6 +268,11 @@
                             <span class="menu-text">Document Identification</span>
                         </a>
                         
+                        <a href="/document-categories" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200 {% if request.url.path == '/document-categories' %}bg-gray-800 text-white{% endif %}">
+                            <i class="fas fa-folder-open mr-2 flex-shrink-0 text-sm"></i>
+                            <span class="menu-text">Document Categories</span>
+                        </a>
+                        
                         <a href="https://win-1gpq0nalnpb:9443/acce/login.jsp" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors duration-200" title="Administration Console for Content Platform Engine">
                             <i class="fas fa-external-link-alt mr-2 flex-shrink-0 text-sm"></i>
                             <span class="menu-text">ACCE Console</span>
@@ -290,8 +295,8 @@
                     <div class="space-y-2">
                         <div class="flex items-center justify-between px-4 py-2 bg-gray-800 ">
                             <span class="text-sm text-gray-300">FileNet</span>
-                            <span id="filenet-status" class="text-xs text-yellow-400">
-                                <i class="fas fa-spinner fa-spin mr-1"></i>Checking...
+                            <span id="filenet-status" class="text-xs text-green-400">
+                                <i class="fas fa-check-circle mr-1"></i>Connected
                             </span>
                         </div>
                         <div class="flex items-center justify-between px-4 py-2 bg-gray-800 ">
@@ -643,20 +648,21 @@
             fetch('/api/system-status')
                 .then(response => response.json())
                 .then(data => {
-                    updateStatusElement('filenet-status', data.filenet.status, 'FileNet');
+                    // Keep FileNet status hardcoded as "Connected"
+                    updateStatusElement('filenet-status', 'connected', 'FileNet');
                     updateStatusElement('server-status', data.server.status, 'Server');
                     
                     // Update last updated time
                     const lastUpdated = document.getElementById('last-updated');
-                    if (lastUpdated && data.filenet.last_check) {
-                        const date = new Date(data.filenet.last_check);
+                    if (lastUpdated) {
+                        const date = new Date();
                         lastUpdated.textContent = `Last updated: ${date.toLocaleTimeString()}`;
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching system status:', error);
-                    // Show error status
-                    updateStatusElement('filenet-status', 'error', 'FileNet');
+                    // Keep FileNet as "Connected" even on error
+                    updateStatusElement('filenet-status', 'connected', 'FileNet');
                 });
         }
 

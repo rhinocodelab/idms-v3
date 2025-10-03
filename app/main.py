@@ -3716,3 +3716,189 @@ async def update_classification_settings(request: Request, data: dict):
     except Exception as e:
         logger.error(f"Error updating classification settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to update classification settings")
+
+# Document Categories Routes
+@app.get("/document-categories")
+async def document_categories_page(request: Request):
+    """Document categories management page (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    return templates.TemplateResponse("document_categories.html", {"request": request})
+
+@app.get("/api/document-categories")
+async def get_document_categories(request: Request):
+    """Get all document categories (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        from datetime import datetime
+        
+        # Load existing categories from file or create default ones
+        categories_file = "app/document_categories.json"
+        if os.path.exists(categories_file):
+            with open(categories_file, 'r', encoding='utf-8') as f:
+                categories = json.load(f)
+        else:
+            # Create default categories from existing_categories.txt
+            categories = {}
+            try:
+                with open("app/existing_categories.txt", 'r', encoding='utf-8') as f:
+                    category_names = [line.strip() for line in f.readlines() if line.strip()]
+                
+                for i, name in enumerate(category_names):
+                    # Determine category type based on name
+                    category_type = "other"
+                    if any(keyword in name.lower() for keyword in ["pan", "aadhar", "passport", "voter", "driving", "license", "id"]):
+                        category_type = "identity"
+                    elif any(keyword in name.lower() for keyword in ["business", "proposal", "employee", "handbook", "job", "meeting", "resume"]):
+                        category_type = "business"
+                    elif any(keyword in name.lower() for keyword in ["bank", "transaction", "financial", "ledger", "salary"]):
+                        category_type = "financial"
+                    elif any(keyword in name.lower() for keyword in ["nda", "agreement", "legal"]):
+                        category_type = "legal"
+                    elif any(keyword in name.lower() for keyword in ["script", "code", "kubernetes", "ci/cd", "infrastructure", "technical"]):
+                        category_type = "technical"
+                    
+                    categories[f"category_{i+1}"] = {
+                        "name": name,
+                        "description": f"Category for {name} documents",
+                        "type": category_type,
+                        "created": datetime.now().strftime("%Y-%m-%d %H:%M")
+                    }
+                
+                # Save the default categories
+                with open(categories_file, 'w', encoding='utf-8') as f:
+                    json.dump(categories, f, indent=2, ensure_ascii=False)
+                    
+            except FileNotFoundError:
+                # If existing_categories.txt doesn't exist, start with empty categories
+                categories = {}
+        
+        return {"categories": categories}
+    except Exception as e:
+        logger.error(f"Error loading document categories: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load categories")
+
+@app.post("/api/document-categories")
+async def create_document_category(request: Request, data: dict):
+    """Create a new document category (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        from datetime import datetime
+        
+        categories_file = "app/document_categories.json"
+        
+        # Load existing categories
+        if os.path.exists(categories_file):
+            with open(categories_file, 'r', encoding='utf-8') as f:
+                categories = json.load(f)
+        else:
+            categories = {}
+        
+        # Generate unique key
+        category_key = f"category_{len(categories) + 1}"
+        
+        # Add new category
+        categories[category_key] = {
+            "name": data.get("name"),
+            "description": data.get("description"),
+            "type": data.get("type"),
+            "created": datetime.now().strftime("%Y-%m-%d %H:%M")
+        }
+        
+        # Save categories
+        with open(categories_file, 'w', encoding='utf-8') as f:
+            json.dump(categories, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Category created successfully"}
+    except Exception as e:
+        logger.error(f"Error creating document category: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create category")
+
+@app.put("/api/document-categories/{category_key}")
+async def update_document_category(request: Request, category_key: str, data: dict):
+    """Update an existing document category (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        categories_file = "app/document_categories.json"
+        
+        if not os.path.exists(categories_file):
+            raise HTTPException(status_code=404, detail="Categories file not found")
+        
+        with open(categories_file, 'r', encoding='utf-8') as f:
+            categories = json.load(f)
+        
+        if category_key not in categories:
+            raise HTTPException(status_code=404, detail="Category not found")
+        
+        # Update category
+        categories[category_key] = {
+            "name": data.get("name"),
+            "description": data.get("description"),
+            "type": data.get("type"),
+            "created": categories[category_key].get("created", "Unknown")
+        }
+        
+        # Save categories
+        with open(categories_file, 'w', encoding='utf-8') as f:
+            json.dump(categories, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Category updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating document category: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update category")
+
+@app.delete("/api/document-categories/{category_key}")
+async def delete_document_category(request: Request, category_key: str):
+    """Delete a document category (Admin only)"""
+    user = require_auth(request)
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        import json
+        import os
+        
+        categories_file = "app/document_categories.json"
+        
+        if not os.path.exists(categories_file):
+            raise HTTPException(status_code=404, detail="Categories file not found")
+        
+        with open(categories_file, 'r', encoding='utf-8') as f:
+            categories = json.load(f)
+        
+        if category_key not in categories:
+            raise HTTPException(status_code=404, detail="Category not found")
+        
+        # Delete category
+        del categories[category_key]
+        
+        # Save categories
+        with open(categories_file, 'w', encoding='utf-8') as f:
+            json.dump(categories, f, indent=2, ensure_ascii=False)
+        
+        return {"message": "Category deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting document category: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete category")
